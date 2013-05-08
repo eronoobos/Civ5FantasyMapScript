@@ -1188,16 +1188,16 @@ local function expandContinent(tiles, id, maxArea, maxIterations, isolateContine
 	local lastCount = 0
 
 	local directedness = { 0, 0, 0, 0, 0, 0 }
-	local total = 3
+	local total = 6
 	for n = 1, total do
 		local cd = math.random(1,4)
 		local d = cardinalToHex(cd)
 		directedness[d] = directedness[d] + 1
-		if d == 2 or d == 5 then
-			directedness[d+1] = directedness[d+1] + 1
-		elseif d == 3 or d == 6 then
-			directedness[d-1] = directedness[d-1] + 1
-		end
+--		if d == 2 or d == 5 then
+--			directedness[d+1] = directedness[d+1] + 1
+--		elseif d == 3 or d == 6 then
+--			directedness[d-1] = directedness[d-1] + 1
+--		end
 	end
 	print(directedness[1], directedness[2], directedness[3], directedness[4], directedness[5], directedness[6])
 
