@@ -1075,6 +1075,74 @@ local function fillQuadrants()
 end
 
 
+local function getCenter(tiles)
+	if #tiles == 0 then
+		return -1, -1
+	elseif #tiles == 1 then
+		return getXY(tiles[1])
+	end
+	local sumx = 0
+	local sumy = 0
+	local tilecount = 0
+	for nothing, index in pairs(tiles) do
+		local x, y = getXY(index)
+		sumx = sumx + x
+		sumy = sumy + y
+		tilecount = tilecount + 1
+	end
+	return math.floor(sumx / tilecount), math.floor(sumy / tilecount)
+end
+
+
+local function getQuadrant(cx, cy, x, y)
+	local q
+	if x >= cx then
+		q = 1
+	else
+		q = 3
+	end
+	if y < cy then
+		q = q + 1
+	end
+	return q
+end
+
+
+local function getEighth(cx, cy, x, y)
+	local diffx = x - cx
+	local diffy = y - cy
+	if diffy >= 0 then
+		if diffx >= 0 then
+			if diffx <= diffy then
+				return 1
+			else
+				return 2
+			end
+		else
+			if math.abs(diffx) <= diffy then
+				return 3
+			else
+				return 4
+			end
+		end
+	else
+		if diffx >= 0 then
+			if diffx <= math.abs(diffy) then
+				return 5
+			else
+				return 6
+			end
+		else
+			if diffx <= diffy then
+				return 7
+			else
+				return 8
+			end
+		end
+	end
+end
+
+
 local function canExpandContinentHere(index, continentIndex, isolateContinent)
 	local nx, ny = getXY(index)
 	local neighbortest = true
@@ -1193,13 +1261,17 @@ local function expandContinent(tiles, id, maxArea, maxIterations, isolateContine
 		local cd = math.random(1,4)
 		local d = cardinalToHex(cd)
 		directedness[d] = directedness[d] + 1
---		if d == 2 or d == 5 then
---			directedness[d+1] = directedness[d+1] + 1
---		elseif d == 3 or d == 6 then
---			directedness[d-1] = directedness[d-1] + 1
---		end
 	end
-	print(directedness[1], directedness[2], directedness[3], directedness[4], directedness[5], directedness[6])
+--	print(directedness[1], directedness[2], directedness[3], directedness[4], directedness[5], directedness[6])
+
+	local eighthFavoring = { 0, 0, 0, 0, 0, 0, 0, 0 }
+	total = 8
+	for n = 1, total do
+		local e = math.random(1,8)
+		eighthFavoring[e] = eighthFavoring[e] + 1
+	end
+	local centerx, centery = getCenter(tiles)
+	print("center:", centerx, centery)
 
 	repeat
 		local bufferIndex
@@ -1226,10 +1298,18 @@ local function expandContinent(tiles, id, maxArea, maxIterations, isolateContine
 				continentalTiles[index] = continentIndex
 				table.insert(continentalXY, { x = nx, y = ny })
 				table.insert(tileBuffer, index)
+
 				-- inserting certain directions twice decreases hexagonal tendency?
 				if directedness[d] > 0 then
 					for dd = 1, directedness[d] do table.insert(tileBuffer, index) end
 				end
+
+				-- inserting certain eighths around continental center of mass
+				local e = getEighth(centerx, centery, nx, ny)
+				if eighthFavoring[e] > 0 then
+					for i = 1, eighthFavoring[e] do table.insert(tileBuffer, index) end
+				end
+
 				table.insert(newTiles, index)
 				if nearcoast then continentConnected = true end
 				newCount = newCount + 1
@@ -1361,9 +1441,12 @@ local function growContinents()
 		local tiles = paintContinent(x, y, continentIndex, paintedSize, isolateContinent)
 		continentalTotalTiles = continentalTotalTiles + #tiles
 		print("tiles painted", #tiles)
-		local expandedTiles = expandContinent(tiles, continentIndex, expandedSize, nil, isolateContinent)
-		continentalTotalTiles = continentalTotalTiles + #expandedTiles
-		print("tiles expanded", #expandedTiles)
+		local expandedTiles = {}
+		if #tiles > 0 then
+			expandedTiles = expandContinent(tiles, continentIndex, expandedSize, nil, isolateContinent)
+			continentalTotalTiles = continentalTotalTiles + #expandedTiles
+			print("tiles expanded", #expandedTiles)
+		end
 
 		-- clear occupied continental tiles from available ocean tile list
 		-- if the continent wasn't able to grow at all, remove its starting tile and neighbors from possibility

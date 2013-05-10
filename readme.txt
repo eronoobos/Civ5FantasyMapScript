@@ -7,7 +7,8 @@ v13 --> v14
 -- allow mountains on 1 hex wide peninsulas. in general make mountain placement more lax
 	-- interregion ranges now do not ever form on coasts (hence can be gotten aroound
 	-- 2 or 4 tiles are dropped from ranges when raised if they're large, to allow better passage
--- experiment with "directedness" of continent expansion to avoid hexagonal shapes
+-- "directedness" of continent expansion to avoid hexagonal shapes
+-- similar favoring of eighths of its angle from the continental center of mass (calculated when painted)
 	
 v12 --> v13
 -- switch jungles from grassland to plains
