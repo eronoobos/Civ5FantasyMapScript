@@ -159,6 +159,8 @@ local polarIce = false
 local smallestRegionSize = 5
 local temperature = 2
 local rainfall = 2
+local directednessTotal = 3
+local eighthFavoringTotal = 4
 
 ----
 
@@ -1256,8 +1258,7 @@ local function expandContinent(tiles, id, maxArea, maxIterations, isolateContine
 	local lastCount = 0
 
 	local directedness = { 0, 0, 0, 0, 0, 0 }
-	local total = 6
-	for n = 1, total do
+	for n = 1, directednessTotal do
 		local cd = math.random(1,4)
 		local d = cardinalToHex(cd)
 		directedness[d] = directedness[d] + 1
@@ -1265,13 +1266,12 @@ local function expandContinent(tiles, id, maxArea, maxIterations, isolateContine
 --	print(directedness[1], directedness[2], directedness[3], directedness[4], directedness[5], directedness[6])
 
 	local eighthFavoring = { 0, 0, 0, 0, 0, 0, 0, 0 }
-	total = 8
-	for n = 1, total do
+	for n = 1, eighthFavoringTotal do
 		local e = math.random(1,8)
 		eighthFavoring[e] = eighthFavoring[e] + 1
 	end
 	local centerx, centery = getCenter(tiles)
-	print("center:", centerx, centery)
+--	print("center:", centerx, centery)
 
 	repeat
 		local bufferIndex
@@ -2426,6 +2426,7 @@ function AddFeatures()
 				end
 			end
 		end
+
 	end
 
 	for thisFeature in GameInfo.Features() do
@@ -2443,6 +2444,23 @@ function AddFeatures()
 		local plot = Map.GetPlotByIndex(index-1)
 		if plot ~= nil then
 			plot:SetFeatureType(FeatureTypes.FEATURE_JUNGLE)
+		end
+	end
+	]]--
+
+	-- trying to find bugs
+	--[[
+	for index = 1, mapArea do
+		local plot = Map.GetPlotByIndex(index - 1)
+		local p = plot:GetPlotType()
+		local t = plot:GetTerrainType()
+		local f = plot:GetFeatureType()
+		if p == PlotTypes.PLOT_MOUNTAIN and t > 4 then
+			print("bad mountain plot", p, t, f, "at", index)
+		end
+		if t > 6 then print ("mountain or hill terrain", p, t, f, "at", index) end
+		if f == FeatureTypes.FEATURE_JUNGLE and t ~= TerrainTypes.TERRAIN_PLAINS then
+			print ("jungle not on plains", p, t, f, "at", index)
 		end
 	end
 	]]--

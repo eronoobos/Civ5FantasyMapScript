@@ -1,3 +1,5 @@
+-- fix mountain tiles w/ yields bug (what's the problem?)
+-- fix jungle tiles appearing on grassland bug (how does this even happen?)
 -- allow more than one ally, with probabilities for each and make the appearance of any ally dependent upon latitudes. (plains for example should have tundra, desert, and grassland)
 -- code change: regionIndex and regionName are now redundant. merge them.
 -- better system for figuring out where deep & shallow areas are for expanding coasts
