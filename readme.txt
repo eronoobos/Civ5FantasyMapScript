@@ -1,10 +1,8 @@
--- improve latitude sensitive terraintype selection: if none of the terrains in tmult are allowed at the latitude, then find the terraintype with the largest distance from the specified latitude to the terrain's maximum and minimum.
-	-- also, the randomization should be a random chance to select an *allowed* terrain (new list generated each latitude), not just blindly selecting one at random until it's ok
+-- add minimum to dice roll function (so that wet climates can more consistently put forests & jungles)
 -- try to figure out what causes texture errors?
 -- rename map options for clarity
-	-- mountains = "World Age" thousands of years
 	-- continent size should be arranged small to large
--- restrict land area of climate-specified terrain types, to prevent maps that are entirely one thing. as in use the probabilities to calculate maximum total area of each terrain type, and remove that terrain type from the list of possibilities if it goes over.
+		-- same with continent shape (extra snakey to total blobs), region size, 
 -- possibly make region size dependent upon map size (ginormous regions on a tiny map for instance, is just stupid)
 -- possibly stop painting/expanding region when it hits the maximum or minimum latitude
 -- allow more than one ally, with probabilities for each and make the appearance of any ally dependent upon latitudes. (plains for example should have tundra, desert, and grassland)
@@ -12,6 +10,12 @@
 -- better system for figuring out where deep & shallow areas are for expanding coasts
 -- posibility of seperating regions with rivers?
 
+v14 --> v15
+-- mountains map option = "World Age" thousands of years
+-- improve latitude sensitive terraintype selection: if none of the terrains in tmult are allowed at the latitude, then find the terraintype with the largest distance from the specified latitude to the terrain's maximum and minimum.
+	-- also, the randomization should be a random chance to select an *allowed* terrain (new list generated each latitude), not just blindly selecting one at random until it's ok
+-- restrict land area of climate-specified terrain types, to prevent maps that are entirely one thing. as in use the probabilities to calculate maximum total area of each terrain type, and remove that terrain type from the list of possibilities if it goes over.
+	
 v13 --> v14
 -- allow mountains on 1 hex wide peninsulas. in general make mountain placement more lax
 	-- interregion ranges now do not ever form on coasts (hence can be gotten aroound

@@ -24,24 +24,24 @@ function GetMapScriptInfo()
 			{
                 Name = "Ocean Size",
                 Values = {
-					"No Polar Oceans",
-                    "Navegable",
+					"Channels",
+                    "Navegable Channels",
                     "Mostly Land",
-					"Half",
+					"Half Land",
 					"Earth",
 					"Waterworld",
-					"Seriously?",
+					"The Great Flood",
                 },
                 DefaultValue = 5,
                 SortPriority = 1,
             },
 			{
-                Name = "Water Depth",
+                Name = "Coast Width",
                 Values = {
-                    "Deep",
+                    "Thin",
                     "Normal",
-					"Shallow",
-					"Really Shallow",
+					"Wide",
+					"Really Wide",
                 },
                 DefaultValue = 2,
                 SortPriority = 1,
@@ -74,13 +74,14 @@ function GetMapScriptInfo()
                 SortPriority = 1,
             },
 			{
-                Name = "Mountains",
+                Name = "World Age",
                 Values = {
-                    "Could be Lonely",
-                    "Perilously Mountainous",
-					"Potential Sanity",
-					"Prozac",
-					"Acrophobia",
+                    "2 Billion Years",
+                    "3 Billion Years",
+					"4 Billion Years",
+					"5 Billion Years",
+					"6 Billion Years",
+					"Random",
                 },
                 DefaultValue = 3,
                 SortPriority = 1,
@@ -543,7 +544,7 @@ local function setNesses()
 	terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = 40, }
 	terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 10, maxi = 50, }
 	terrainLatitudes[GameInfoTypes["TERRAIN_TUNDRA"]] = { mini = 50, maxi = 75, }
-	terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 15, maxi = 40, }
+	terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 15, maxi = 45, }
 	terrainLatitudes[GameInfoTypes["TERRAIN_SNOW"]] = { mini = 70, maxi = 90, }
 
 	featureLatitudes[FeatureTypes.NO_FEATURE] = { mini = 0, maxi = 90, }
@@ -574,9 +575,9 @@ local function setNesses()
 
 	if temperature == 1 then
 		terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = 20, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 0, maxi = 20, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 10, maxi = 30, }
 		terrainLatitudes[GameInfoTypes["TERRAIN_TUNDRA"]] = { mini = 30, maxi = 75, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 0, maxi = 20, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 5, maxi = 25, }
 		terrainLatitudes[GameInfoTypes["TERRAIN_SNOW"]] = { mini = 60, maxi = 90, }
 		featureLatitudes[FeatureTypes.FEATURE_FOREST] = { mini = 15, maxi = 50 }
 		featureLatitudes[FeatureTypes.FEATURE_JUNGLE] = { mini = 0, maxi = 10, }
@@ -605,20 +606,20 @@ local function setNesses()
 			pWorld = "Temperate Wet"
 		end
 	elseif temperature == 3 then
-		terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = 40, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 30, maxi = 70, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = 50, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 25, maxi = 70, }
 		terrainLatitudes[GameInfoTypes["TERRAIN_TUNDRA"]] = { mini = 70, maxi = 80, }
 		terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 10, maxi = 60, }
 		terrainLatitudes[GameInfoTypes["TERRAIN_SNOW"]] = { mini = 80, maxi = 90, }
-		featureLatitudes[FeatureTypes.FEATURE_FOREST] = { mini = 40, maxi = 70 }
-		featureLatitudes[FeatureTypes.FEATURE_JUNGLE] = terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]]
+		featureLatitudes[FeatureTypes.FEATURE_FOREST] = { mini = 35, maxi = 70 }
+		featureLatitudes[FeatureTypes.FEATURE_JUNGLE] = { mini = 0, maxi = 40 }
 		featureLatitudes[FeatureTypes.FEATURE_MARSH] = terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]]
 		featureLatitudes[FeatureTypes.FEATURE_OASIS] = terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]]
 		featureLatitudes[FeatureTypes.FEATURE_ICE] = { mini = 80, maxi = 90, }
 		if rainfall == 1 then
 			terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = 30, }
-			terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 5, maxi = 70, }
-			terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 10, maxi = 30, }
+			terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 5, maxi = 65, }
+			terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 20, maxi = 70, }
 			pWorld = "Hot Arid"
 		elseif rainfall == 2 then
 			pWorld = "Hot"
@@ -709,8 +710,8 @@ local function setNesses()
 	elseif pWorld == "Hot" then
 		fness[FeatureTypes.FEATURE_JUNGLE] = 1.0
 		fcurve[FeatureTypes.FEATURE_JUNGLE] = { dice = 3, invert = true, maximum = 1.0, }
-		fness[FeatureTypes.FEATURE_FOREST] = 0.1
-		fcurve[FeatureTypes.FEATURE_FOREST] = { dice = 1, invert = true, maximum = 0.3, }
+		fness[FeatureTypes.FEATURE_FOREST] = 0.3
+		fcurve[FeatureTypes.FEATURE_FOREST] = { dice = 1, invert = true, maximum = 1.0, }
 		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 20
 		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 2
 		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 10
@@ -718,8 +719,8 @@ local function setNesses()
 		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 0
 		baseTile = "Grass"
 	elseif pWorld == "Hot Wet" then
-		fness[FeatureTypes.FEATURE_FOREST] = 0.3
-		fcurve[FeatureTypes.FEATURE_FOREST] = { dice = 1, invert = false, maximum = 0.3, }
+		fness[FeatureTypes.FEATURE_FOREST] = 0.5
+		fcurve[FeatureTypes.FEATURE_FOREST] = { dice = 1, invert = false, maximum = 1.0, }
 		fness[FeatureTypes.FEATURE_JUNGLE] = 1.0
 		fcurve[FeatureTypes.FEATURE_JUNGLE] = { dice = 1, invert = false, maximum = 1.0, }
 		fness[FeatureTypes.FEATURE_MARSH] = 0.25
@@ -789,13 +790,40 @@ local function generateRegionType(latitude)
 	}
 	local terrainType
 	if useLatitude == true and latitude ~= nil then
-		local stuff = 0
-		repeat
-			local ti = math.random(1,#terrains)
-			terrainType = terrains[ti]
-			stuff = stuff + 1
-		until latitude >= terrainLatitudes[terrainType].mini and latitude <= terrainLatitudes[terrainType].maxi or stuff > #terrains * 2
---		print("latitude check iterations", stuff)
+		-- generate list of terrains allowed at this latitude
+		local terrainsHere = {}
+--		print("latitude", latitude)
+		for tt, mult in pairs(tmult) do
+			if mult > 0 and latitude >= terrainLatitudes[tt].mini and latitude <= terrainLatitudes[tt].maxi then
+				for m = 1, mult do
+					table.insert(terrainsHere, tt)
+				end
+				print(tt, mult)
+			end
+		end
+		if #terrainsHere > 0 then
+			local ti = math.random(1,#terrainsHere)
+			terrainType = terrainsHere[ti]
+--			print(terrainType)
+		else
+			-- if no listed terrains are allowed at this latitude, find the closest one
+			print("using terrain closest to latitude", latitude)
+			local maxdist = -1
+			local maxtt
+			for tt, tudes in pairs(terrainLatitudes) do
+				if latitude >= tudes.mini and latitude <= tudes.maxi then
+					local minidist = latitude - tudes.mini
+					local maxidist = tudes.maxi - latitude
+					local dist = math.min(minidist, maxidist)
+--					print(tt, tudes.mini, tudes.maxi, minidist, maxidist, dist)
+					if dist > maxdist then
+						maxdist = dist
+						maxtt = tt
+					end
+				end
+			end
+			if maxtt ~= nil then terrainType = maxtt end
+		end
 	else
 		local ti = math.random(1,#terrains)
 		terrainType = terrains[ti]
