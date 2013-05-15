@@ -1,6 +1,6 @@
 -- Map Script: Fantasy
 -- Author: zoggop
--- version 14
+-- version 15
 
 --------------------------------------------------------------
 if include == nil then
@@ -208,6 +208,8 @@ local terrainLatitudes = {}
 local featureLatitudes = {}
 local regionDictionary = {}
 local nearOceanIce = {}
+local terrainMaxArea = {}
+local terrainFilledTiles = {}
 
 ----
 
@@ -927,6 +929,10 @@ end
 local function prepareTerrainTileLists()
 	local terrainList = {}
 	local terrains = {}
+	local terrainMaxArea = {}
+
+	-- creating the lists of tiles from the tile dictionary that are of each terrain type specified in tmult
+	-- and creating the list of possible terrains, weighted by tmult
 	for terrainType, mult in pairs(tmult) do
 		local list = prepareTileListByTerrain(terrainType)
 		if #list > 0 then
@@ -936,7 +942,13 @@ local function prepareTerrainTileLists()
 			end
 		end
 	end
-	return terrainList, terrains
+
+	-- calculating the percentage of the land that should be a certain terrain type (used as a maximum)
+	for terrainType, mult in pairs(tmult) do
+		terrainMaxArea[terrainType] = math.floor( (mult / #terrains) * continentalTotalTiles )
+	end
+
+	return terrainList, terrains, terrainMaxArea
 end
 
 
@@ -1609,6 +1621,12 @@ local function paintRegion(x, y, regionIndex, regionName, regionSize)
 				regionalTiles[index] = { regionIndex = regionIndex, painted = true }
 				table.insert(newTiles, index)
 				filledRegionTiles = filledRegionTiles + 1
+				-- counting number of tiles of each terrain type
+				if terrainFilledTiles[tileDictionary[tileName].terrainType] == nil then
+					terrainFilledTiles[tileDictionary[tileName].terrainType] = 1
+				else
+					terrainFilledTiles[tileDictionary[tileName].terrainType] = terrainFilledTiles[tileDictionary[tileName].terrainType] + 1
+				end
 			elseif continentalTiles[index] == nil and d > 0 then
 --				if filledRegionTiles > 6 then table.insert(coastRange, centerIndex) end
 				if keepItInside then
@@ -1690,6 +1708,12 @@ local function expandRegion(tiles, regionIndex, regionName, maxArea, maxIteratio
 						regionalTiles[index] = { regionIndex = regionIndex, painted = false }
 						table.insert(tempTiles, index)
 						newCount = newCount + 1
+						-- counting number of tiles of each terrain type
+						if terrainFilledTiles[tileDictionary[tileName].terrainType] == nil then
+							terrainFilledTiles[tileDictionary[tileName].terrainType] = 1
+						else
+							terrainFilledTiles[tileDictionary[tileName].terrainType] = terrainFilledTiles[tileDictionary[tileName].terrainType] + 1
+						end
 					end
 				elseif ny <= southPole or ny >= northPole then
 					iCount = maxIterations
@@ -1720,7 +1744,7 @@ local function growRegions()
 
 	print("setting by-terrain tile lists for procedural region types...")
 	setNesses()
-	terrainList, terrains = prepareTerrainTileLists()
+	terrainList, terrains, terrainMaxArea = prepareTerrainTileLists()
 
 	local totalTiles = continentalTotalTiles
 	local filledTiles = 0
@@ -1767,6 +1791,20 @@ local function growRegions()
 			end
 		end
 		filledTiles = filledTiles + #expandedTiles
+
+		-- check if number of terrain tiles has exceeded maximum, and remove from possible region terrains if so
+		for terrainType, count in pairs(terrainFilledTiles) do
+			if tmult[terrainType] > 0 and count > terrainMaxArea[terrainType] then
+				print(terrainType, "count", count, "above maximum", terrainMaxArea[terrainType], "removing from list of terrains")
+				tmult[terrainType] = 0
+				for i, tt in pairs(terrains) do
+					if tt == terrainType then
+						table.remove(terrains, i)
+					end
+				end
+			end
+		end
+
 		-- remove filled tiles from availableIndices
 		for ai, index in pairs(availableIndices) do
 			if tileTiles[index] ~= nil then table.remove(availableIndices, ai) end
@@ -2438,7 +2476,7 @@ function AddFeatures()
 	print("popping coasts w/ ice & atolls...")
 	popCoasts()
 
-	-- for debugging, shows where continent isolation is
+	-- for debugging, shows where continent isolation is by putting jungle in the ocean
 	--[[
 	for index, ci in pairs(isCoast) do
 		local plot = Map.GetPlotByIndex(index-1)
