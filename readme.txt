@@ -6,6 +6,8 @@
 -- posibility of seperating regions with rivers?
 
 v14 --> v15
+-- randomized latitudes if random climate
+-- region sizes lessened and smaller variance
 -- climates tweaked a lot. no more terraintypes completely excluded from any climate, and hot and cool latitudes less extreme.
 -- map options tweaked a bit:
 	-- "normal" continent shape is now paintedratio 0.5, and default

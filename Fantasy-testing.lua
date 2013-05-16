@@ -72,7 +72,7 @@ function GetMapScriptInfo()
                     "Total Blobs",
 					"Random",
                 },
-                DefaultValue = 4,
+                DefaultValue = 5,
                 SortPriority = 1,
             },
 			{
@@ -339,20 +339,20 @@ local function setBeforeOptions()
 
 	--region size
 	if Map.GetCustomOption(6) == 1 then -- tiny
-		regionMinSize = 5
+		regionMinSize = 10
 		regionMaxSize = 20
 	elseif Map.GetCustomOption(6) == 2 then -- small
-		regionMinSize = 10
-		regionMaxSize = 50
+		regionMinSize = 20
+		regionMaxSize = 40
 	elseif Map.GetCustomOption(6) == 3 then -- medium
-		regionMinSize = 33
-		regionMaxSize = 100
+		regionMinSize = 40
+		regionMaxSize = 80
 	elseif Map.GetCustomOption(6) == 4 then -- big
-		regionMinSize = 100
-		regionMaxSize = 300
+		regionMinSize = 80
+		regionMaxSize = 140
 	elseif Map.GetCustomOption(6) == 5 then -- Ginormous
-		regionMinSize = 300
-		regionMaxSize = 600
+		regionMinSize = 140
+		regionMaxSize = 280
 	elseif Map.GetCustomOption(6) == 6 then -- random
 		local r = math.random()
 		regionMinSize = math.ceil( ((r * 295) ^ 0.67) + 5 )
@@ -758,6 +758,19 @@ local function setNesses()
 		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 1
 		baseTile = "PlainsJungle"
 	elseif pWorld == "Random" then
+		local grasslat = math.random(30,50)
+		print("random max grass latitude", grasslat)
+		terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = grasslat, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = grasslat - 10, maxi = grasslat + 10, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_TUNDRA"]] = { mini = grasslat + 10, maxi = grasslat + 25, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = grasslat - 25, maxi = grasslat + 5, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_SNOW"]] = { mini = grasslat + 20, maxi = 90, }
+		featureLatitudes[FeatureTypes.FEATURE_FOREST] = { mini = grasslat - 15, maxi = grasslat + 15 }
+		featureLatitudes[FeatureTypes.FEATURE_JUNGLE] = { mini = 0, maxi = grasslat - 10 }
+		featureLatitudes[FeatureTypes.FEATURE_MARSH] = terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]]
+		featureLatitudes[FeatureTypes.FEATURE_OASIS] = terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]]
+		featureLatitudes[FeatureTypes.FEATURE_ICE] = { mini = grasslat + 20, maxi = 90, }
+
 		fness[FeatureTypes.FEATURE_JUNGLE] = math.random()
 		fness[FeatureTypes.FEATURE_FOREST] = math.random()
 		fcurve[FeatureTypes.FEATURE_FOREST] = { dice = math.random(1,5), invert = true, maximum = math.min(math.random() * 1.5, 1), }
@@ -765,11 +778,11 @@ local function setNesses()
 		fness[FeatureTypes.FEATURE_MARSH] = math.random() * 0.25
 		fcurve[FeatureTypes.FEATURE_MARSH] = { dice = 1, invert = false, maximum = math.random() * 0.4, }
 		fcurve[FeatureTypes.NO_FEATURE] = { dice = 1, invert = false, maximum = math.min(math.random()+0.5, 1), }
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = math.random(0,20)
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = math.random(0,20)
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = math.random(0,20)
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = math.random(0,20)
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = math.random(0,20)
+		tmult[GameInfoTypes["TERRAIN_GRASS"]] = math.random(1,20)
+		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = math.random(1,20)
+		tmult[GameInfoTypes["TERRAIN_DESERT"]] = math.random(1,20)
+		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = math.random(1,20)
+		tmult[GameInfoTypes["TERRAIN_SNOW"]] = math.random(1,20)
 	end
 
 	if useLatitude == true then
