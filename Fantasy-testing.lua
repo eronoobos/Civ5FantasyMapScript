@@ -31,6 +31,7 @@ function GetMapScriptInfo()
 					"Earth",
 					"Waterworld",
 					"The Great Flood",
+					"Random",
                 },
                 DefaultValue = 5,
                 SortPriority = 1,
@@ -49,13 +50,13 @@ function GetMapScriptInfo()
 			{
                 Name = "Continent Size",
                 Values = {
-					"Pangaea",
-                    "Completely Random",
-                    "Big",
-					"Medium",
-					"Small",
-					"Quite Small",
 					"Tiny Islands",
+					"Quite Small",
+					"Small",
+					"Medium",
+					"Big",
+					"Pangaea",
+					"Random",
                 },
                 DefaultValue = 4,
                 SortPriority = 1,
@@ -63,14 +64,15 @@ function GetMapScriptInfo()
 			{
                 Name = "Continent Shape",
                 Values = {
-                    "Total Blobs",
-                    "Blobby",
-					"Normal",
-					"Snakey",
-					"Total Snakes",
 					"Extra Snakey",
+					"Total Snakes",
+					"Snakey",
+					"Normal",
+					"Blobby",
+                    "Total Blobs",
+					"Random",
                 },
-                DefaultValue = 2,
+                DefaultValue = 4,
                 SortPriority = 1,
             },
 			{
@@ -89,11 +91,12 @@ function GetMapScriptInfo()
 			{
                 Name = "Region Size",
                 Values = {
-                    "Ginormous",
-                    "Big",
-					"Medium",
-					"Small",
 					"Tiny",
+					"Small",
+					"Medium",
+					"Big",
+                    "Ginormous",
+					"Random",
                 },
                 DefaultValue = 3,
                 SortPriority = 1,
@@ -162,6 +165,7 @@ local temperature = 2
 local rainfall = 2
 local directednessTotal = 3
 local eighthFavoringTotal = 4
+local latitudeTolerance = 5
 
 ----
 
@@ -211,6 +215,7 @@ local regionDictionary = {}
 local nearOceanIce = {}
 local terrainMaxArea = {}
 local terrainFilledTiles = {}
+local biggestContinentSize = 0
 
 ----
 
@@ -231,6 +236,9 @@ local function setBeforeOptions()
 		landRatio = 0.15
 	elseif Map.GetCustomOption(1) == 7 then
 		landRatio = 0.02
+	elseif Map.GetCustomOption(1) == 8 then
+		landRatio = ((math.random() ^ 1.75) * 0.92) + 0.02
+		print("random land ratio: ", landRatio)
 	end
 
 	-- water depth
@@ -248,46 +256,50 @@ local function setBeforeOptions()
 		coastExpandChance = 1.0
 	end
 
-	-- continent size
-	if Map.GetCustomOption(3) == 1 then --Pangaea
+		-- continent size
+	if Map.GetCustomOption(3) == 1 then --tiny islands
+		cSizeRandom = true
+		cSizeMaxCutoff = 10
+	elseif Map.GetCustomOption(3) == 2 then -- quite small
+		cSizeMin = 0.12
+		cSizeMax = 0.06
+	elseif Map.GetCustomOption(3) == 3 then -- small
+		cSizeMin = 0.3
+		cSizeMax = 0.2
+	elseif Map.GetCustomOption(3) == 4 then -- medium
+		cSizeMin = 0.4
+		cSizeMax = 0.4
+	elseif Map.GetCustomOption(3) == 5 then -- big
+		cSizeMin = 0.4
+		cSizeMax = 0.75
+	elseif Map.GetCustomOption(3) == 6 then -- pangaea
 		pangaea = true
 		cSizeMin = 0.4
 		cSizeMax = 1.0
 		ismuthChance = 0.2
-	elseif Map.GetCustomOption(3) == 2 then -- Completely random
+	elseif Map.GetCustomOption(3) == 7 then -- random
 		cSizeMin = (math.random() * 0.28) + 0.12
 		cSizeMax = (math.random() * 0.94) + 0.06
-	elseif Map.GetCustomOption(3) == 3 then -- big
-		cSizeMin = 0.4
-		cSizeMax = 0.75
-	elseif Map.GetCustomOption(3) == 4 then -- medium
-		cSizeMin = 0.4
-		cSizeMax = 0.5
-	elseif Map.GetCustomOption(3) == 5 then -- small
-		cSizeMin = 0.3
-		cSizeMax = 0.25
-	elseif Map.GetCustomOption(3) == 6 then -- quite small
-		cSizeMin = 0.12
-		cSizeMax = 0.06
-	elseif Map.GetCustomOption(3) == 7 then -- tiny islands
-		cSizeRandom = true
-		cSizeMaxCutoff = 10
+		print("random min size: ", cSizeMin, "  random max size: ", cSizeMax)
 	end
 
 	-- continent shape
-	if Map.GetCustomOption(4) == 1 then --total blobs
-		paintedRatio = 0.1
-	elseif Map.GetCustomOption(4) == 2 then --blobby
-		paintedRatio = 0.3
-	elseif Map.GetCustomOption(4) == 3 then --normal
-		paintedRatio = 0.65
-	elseif Map.GetCustomOption(4) == 4 then --snakeyish
-		paintedRatio = 0.9
-	elseif Map.GetCustomOption(4) == 5 then --total snakes
-		paintedRatio = 1.0
-	elseif Map.GetCustomOption(4) == 6 then --extra snakey
+	if Map.GetCustomOption(4) == 1 then --extra snakey
 		paintedRatio = 1.0
 		continentLargeBrushChance = 100
+	elseif Map.GetCustomOption(4) == 2 then --total snakes
+		paintedRatio = 1.0
+	elseif Map.GetCustomOption(4) == 3 then --snakey
+		paintedRatio = 0.8
+	elseif Map.GetCustomOption(4) == 4 then --normal
+		paintedRatio = 0.5
+	elseif Map.GetCustomOption(4) == 5 then -- blobby
+		paintedRatio = 0.3
+	elseif Map.GetCustomOption(4) == 6 then -- total blobs
+		paintedRatio = 0.1
+	elseif Map.GetCustomOption(4) == 7 then -- random
+		paintedRatio = (math.random() * 0.9) + 0.1
+		print("random painted ratio: ", paintedRatio)
 	end
 
 	-- mountains
@@ -316,23 +328,36 @@ local function setBeforeOptions()
 		mountainRatio = 0.0
 		levelMountains = 1.0
 		hillsness = 0.25
+	elseif Map.GetCustomOption(5) == 6 then
+		local mountainsFrodoMountains = math.random()
+		print("random mountainousness, 0 to 100: ", math.floor(mountainsFrodoMountains * 100))
+		mountainRatio = (mountainsFrodoMountains ^ 2.3) * 0.5
+		coastRangeRatio = (mountainsFrodoMountains * 0.2) + 0.15
+		rangeHillRatio = ((1 - mountainsFrodoMountains) * 0.2) + 0.2
+		hillsness = (mountainsFrodoMountains * 0.65) + 0.25
 	end
 
 	--region size
-	if Map.GetCustomOption(6) == 1 then
-		regionMinSize = 300
-		regionMaxSize = 600
-	elseif Map.GetCustomOption(6) == 2 then
-		regionMinSize = 100
-		regionMaxSize = 300
-	elseif Map.GetCustomOption(6) == 3 then
-
-	elseif Map.GetCustomOption(6) == 4 then
-		regionMinSize = 10
-		regionMaxSize = 50
-	elseif Map.GetCustomOption(6) == 5 then
+	if Map.GetCustomOption(6) == 1 then -- tiny
 		regionMinSize = 5
 		regionMaxSize = 20
+	elseif Map.GetCustomOption(6) == 2 then -- small
+		regionMinSize = 10
+		regionMaxSize = 50
+	elseif Map.GetCustomOption(6) == 3 then -- medium
+		regionMinSize = 33
+		regionMaxSize = 100
+	elseif Map.GetCustomOption(6) == 4 then -- big
+		regionMinSize = 100
+		regionMaxSize = 300
+	elseif Map.GetCustomOption(6) == 5 then -- Ginormous
+		regionMinSize = 300
+		regionMaxSize = 600
+	elseif Map.GetCustomOption(6) == 6 then -- random
+		local r = math.random()
+		regionMinSize = math.ceil( ((r * 295) ^ 0.67) + 5 )
+		regionMaxSize = math.ceil( ((r * 580) ^ 0.77) + 20 )
+		print("random region min size: ", regionMinSize, "  random region max size: ", regionMaxSize)
 	end
 
 	-- latitude-based climate
@@ -375,7 +400,7 @@ end
 
 local function setAfterOptions()
 
-	-- ocean size
+	-- ocean size and latitude-based climate
 	if Map.GetCustomOption(1) == 1 or Map.GetCustomOption(7) == 2 then
 		southPole = -1
 		northPole = yMax
@@ -574,10 +599,10 @@ local function setNesses()
 	end
 
 	if temperature == 1 then
-		terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = 20, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 10, maxi = 30, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_TUNDRA"]] = { mini = 30, maxi = 75, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 5, maxi = 25, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = 30, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 10, maxi = 40, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_TUNDRA"]] = { mini = 40, maxi = 70, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 5, maxi = 35, }
 		terrainLatitudes[GameInfoTypes["TERRAIN_SNOW"]] = { mini = 60, maxi = 90, }
 		featureLatitudes[FeatureTypes.FEATURE_FOREST] = { mini = 15, maxi = 50 }
 		featureLatitudes[FeatureTypes.FEATURE_JUNGLE] = { mini = 0, maxi = 10, }
@@ -602,13 +627,13 @@ local function setNesses()
 			pWorld = "Temperate"
 		elseif rainfall == 3 then
 			featureLatitudes[FeatureTypes.FEATURE_FOREST] = { mini = 10, maxi = 70 }
-			featureLatitudes[FeatureTypes.FEATURE_JUNGLE] = { mini = 0, maxi = 40, }
+			featureLatitudes[FeatureTypes.FEATURE_JUNGLE] = { mini = 0, maxi = 35, }
 			pWorld = "Temperate Wet"
 		end
 	elseif temperature == 3 then
 		terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = 50, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 25, maxi = 70, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_TUNDRA"]] = { mini = 70, maxi = 80, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 20, maxi = 60, }
+		terrainLatitudes[GameInfoTypes["TERRAIN_TUNDRA"]] = { mini = 60, maxi = 85, }
 		terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 10, maxi = 60, }
 		terrainLatitudes[GameInfoTypes["TERRAIN_SNOW"]] = { mini = 80, maxi = 90, }
 		featureLatitudes[FeatureTypes.FEATURE_FOREST] = { mini = 35, maxi = 70 }
@@ -633,19 +658,19 @@ local function setNesses()
 		fcurve[FeatureTypes.FEATURE_FOREST] = { dice = 1, invert = false, maximum = 0.1, }
 		fness[FeatureTypes.FEATURE_JUNGLE] = 0.0
 		fness[FeatureTypes.FEATURE_MARSH] = 0.0
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 0
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 0
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 3
+		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 2
+		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 3
+		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 10
 		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 20
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 3
+		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 5
 		baseTile = "Desert"
 	elseif pWorld == "Cold" then
 		fness[FeatureTypes.FEATURE_JUNGLE] = 0.0
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 0
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 2
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 0
+		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 3
+		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 3
+		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 3
 		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 20
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 14
+		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 10
 		baseTile = "Snow"
 	elseif pWorld == "Cold Wet" then
 		fness[FeatureTypes.FEATURE_FOREST] = 1.0
@@ -654,9 +679,9 @@ local function setNesses()
 		fness[FeatureTypes.FEATURE_MARSH] = 0.25
 		fcurve[FeatureTypes.FEATURE_MARSH] = { dice = 1, invert = false, maximum = 0.4, }
 		fcurve[FeatureTypes.NO_FEATURE] = { dice = 1, invert = false, maximum = 0.5, }
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 0
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 5
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 0
+		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 4
+		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 6
+		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 2
 		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 20
 		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 20
 		baseTile = "TundraForest"
@@ -666,20 +691,20 @@ local function setNesses()
 		fness[FeatureTypes.FEATURE_JUNGLE] = 0.1
 		fcurve[FeatureTypes.FEATURE_JUNGLE] = { dice = 1, invert = false, maximum = 0.1, }
 		fness[FeatureTypes.FEATURE_MARSH] = 0.0
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 0
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 4
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 10
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 2
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 0
+		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 3
+		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 10
+		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 20
+		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 4
+		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 2
 		baseTile = "Desert"
 	elseif pWorld == "Temperate" then
 		fness[FeatureTypes.FEATURE_FOREST] = 0.7
 		fness[FeatureTypes.FEATURE_JUNGLE] = 0.5
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 10
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 10
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 7
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 3
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 3
+		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 20
+		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 20
+		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 12
+		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 6
+		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 6
 		baseTile = "Grass"
 	elseif pWorld == "Temperate Wet" then
 		fness[FeatureTypes.FEATURE_FOREST] = 1.0
@@ -691,9 +716,9 @@ local function setNesses()
 		fcurve[FeatureTypes.NO_FEATURE] = { dice = 1, invert = false, maximum = 0.5, }
 		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 20
 		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 12
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 0
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 2
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 4
+		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 2
+		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 3
+		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 6
 		baseTile = "GrassForest"
 	elseif pWorld == "Hot Arid" then
 		fness[FeatureTypes.FEATURE_FOREST] = 0.1
@@ -701,11 +726,11 @@ local function setNesses()
 		fness[FeatureTypes.FEATURE_JUNGLE] = 0.3
 		fcurve[FeatureTypes.FEATURE_JUNGLE] = { dice = 1, invert = false, maximum = 0.3, }
 		fness[FeatureTypes.FEATURE_MARSH] = 0.0
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 2
+		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 6
 		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 6
 		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 20
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 0
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 0
+		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 1
+		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 1
 		baseTile = "Desert"
 	elseif pWorld == "Hot" then
 		fness[FeatureTypes.FEATURE_JUNGLE] = 1.0
@@ -713,10 +738,10 @@ local function setNesses()
 		fness[FeatureTypes.FEATURE_FOREST] = 0.3
 		fcurve[FeatureTypes.FEATURE_FOREST] = { dice = 1, invert = true, maximum = 1.0, }
 		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 20
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 2
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 10
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 0
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 0
+		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 18
+		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 13
+		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 1
+		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 1
 		baseTile = "Grass"
 	elseif pWorld == "Hot Wet" then
 		fness[FeatureTypes.FEATURE_FOREST] = 0.5
@@ -727,10 +752,10 @@ local function setNesses()
 		fcurve[FeatureTypes.FEATURE_MARSH] = { dice = 1, invert = false, maximum = 0.4, }
 		fcurve[FeatureTypes.NO_FEATURE] = { dice = 1, invert = false, maximum = 0.5, }
 		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 20
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 5
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 0
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 0
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 0
+		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 6
+		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 2
+		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 1
+		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 1
 		baseTile = "PlainsJungle"
 	elseif pWorld == "Random" then
 		fness[FeatureTypes.FEATURE_JUNGLE] = math.random()
@@ -1477,16 +1502,21 @@ local function growContinents()
 			end
 		end
 
+		-- painting and expanding continent (expansion only if any tiles were painted at all)
+		local actualContinentSize = 0
 		print("isolated?", isolateContinent)
 		local tiles = paintContinent(x, y, continentIndex, paintedSize, isolateContinent)
 		continentalTotalTiles = continentalTotalTiles + #tiles
 		print("tiles painted", #tiles)
+		actualContinentSize = actualContinentSize + #tiles
 		local expandedTiles = {}
 		if #tiles > 0 then
 			expandedTiles = expandContinent(tiles, continentIndex, expandedSize, nil, isolateContinent)
 			continentalTotalTiles = continentalTotalTiles + #expandedTiles
 			print("tiles expanded", #expandedTiles)
+			actualContinentSize = actualContinentSize + #expandedTiles
 		end
+		if actualContinentSize > biggestContinentSize then biggestContinentSize = actualContinentSize end
 
 		-- clear occupied continental tiles from available ocean tile list
 		-- if the continent wasn't able to grow at all, remove its starting tile and neighbors from possibility
@@ -1625,6 +1655,28 @@ local function fillTinyLakes()
 	end
 end
 
+local function tileLatitudeChecks(index, tileName)
+	local tt = tileDictionary[tileName].terrainType
+	if tileDictionary[tileName].terrainMasquerade ~= nil then
+		tt = tileDictionary[tileName].terrainMasquerade
+	end
+	local ft = tileDictionary[tileName].feature
+	local plot = Map.GetPlotByIndex(index - 1)
+	local latitude
+	if plot ~= nil then latitude = plot:GetLatitude() end
+	if latitude ~= nil then
+		local tolerance = math.random(-1,1)
+		tolerance = tolerance * latitudeTolerance
+		latitude = math.min(math.max(latitude - tolerance, 0), 90)
+--		local x, y = getXY(index)
+--		if x == 1 then print (x, y, latitude, tt, terrainLatitudes[tt].maxi, terrainLatitudes[tt].mini, ft, featureLatitudes[ft].maxi, featureLatitudes[ft].mini) end
+		if latitude > terrainLatitudes[tt].maxi or latitude < terrainLatitudes[tt].mini or latitude > featureLatitudes[ft].maxi or latitude < featureLatitudes[ft].mini then
+			return false
+		else
+			return true
+		end
+	end
+end
 
 local function paintRegion(x, y, regionIndex, regionName, regionSize)
 	local region = regionDictionary[regionName]
@@ -1638,22 +1690,29 @@ local function paintRegion(x, y, regionIndex, regionName, regionSize)
 		local dLimit = 0
 		local centerIndex = getIndex(x, y)
 		if math.random(1,region.largeBrushChance) == 1 then dLimit = 6 end
+		local stopRegion = false
 		for d = 0, 6 do
 			local nx, ny = directionalTransform(d, x, y)
 			local index = getIndex(nx, ny)
 			if tileTiles[index] == nil and continentalTiles[index] ~= nil and d <= dLimit then
 				local tileNumber = math.random(1, #region.paintTileList)
 				local tileName = region.paintTileList[tileNumber]
-				tileTiles[index] = tileName
-				regionNames[index] = regionName
-				regionalTiles[index] = { regionIndex = regionIndex, painted = true }
-				table.insert(newTiles, index)
-				filledRegionTiles = filledRegionTiles + 1
-				-- counting number of tiles of each terrain type
-				if terrainFilledTiles[tileDictionary[tileName].terrainType] == nil then
-					terrainFilledTiles[tileDictionary[tileName].terrainType] = 1
-				else
-					terrainFilledTiles[tileDictionary[tileName].terrainType] = terrainFilledTiles[tileDictionary[tileName].terrainType] + 1
+				local draw = true
+				if useLatitude == true then
+					draw = tileLatitudeChecks(index, tileName)
+				end
+				if draw == true then
+					tileTiles[index] = tileName
+					regionNames[index] = regionName
+					regionalTiles[index] = { regionIndex = regionIndex, painted = true }
+					table.insert(newTiles, index)
+					filledRegionTiles = filledRegionTiles + 1
+					-- counting number of tiles of each terrain type
+					if terrainFilledTiles[tileDictionary[tileName].terrainType] == nil then
+						terrainFilledTiles[tileDictionary[tileName].terrainType] = 1
+					else
+						terrainFilledTiles[tileDictionary[tileName].terrainType] = terrainFilledTiles[tileDictionary[tileName].terrainType] + 1
+					end
 				end
 			elseif continentalTiles[index] == nil and d > 0 then
 --				if filledRegionTiles > 6 then table.insert(coastRange, centerIndex) end
@@ -1669,6 +1728,8 @@ local function paintRegion(x, y, regionIndex, regionName, regionSize)
 				end
 			end
 		end
+
+		if stopRegion == true then break end
 
 		if badDirectionTotal >= 6 and keepItInside then
 --			print("no good direction")
@@ -1724,6 +1785,7 @@ local function expandRegion(tiles, regionIndex, regionName, maxArea, maxIteratio
 			end
 			local tileIndex = tileBuffer[bufferIndex]
 			local tx, ty = getXY(tileIndex)
+			local stopRegion = false
 			for d = 1, 6 do
 				local nx, ny = directionalTransform(d, tx, ty)
 				local index = ny * iW + nx + 1
@@ -1731,16 +1793,23 @@ local function expandRegion(tiles, regionIndex, regionName, maxArea, maxIteratio
 					if math.random() > regionNoExpandRatio then
 						local tileNumber = math.random(1, #region.tileList)
 						local tileName = region.tileList[tileNumber]
-						tileTiles[index] = tileName
-						regionNames[index] = regionName
-						regionalTiles[index] = { regionIndex = regionIndex, painted = false }
-						table.insert(tempTiles, index)
-						newCount = newCount + 1
-						-- counting number of tiles of each terrain type
-						if terrainFilledTiles[tileDictionary[tileName].terrainType] == nil then
-							terrainFilledTiles[tileDictionary[tileName].terrainType] = 1
-						else
-							terrainFilledTiles[tileDictionary[tileName].terrainType] = terrainFilledTiles[tileDictionary[tileName].terrainType] + 1
+						-- latitude checks
+						local draw = true
+						if useLatitude == true then
+							draw = tileLatitudeChecks(index, tileName)
+						end
+						if draw == true then
+							tileTiles[index] = tileName
+							regionNames[index] = regionName
+							regionalTiles[index] = { regionIndex = regionIndex, painted = false }
+							table.insert(tempTiles, index)
+							newCount = newCount + 1
+							-- counting number of tiles of each terrain type
+							if terrainFilledTiles[tileDictionary[tileName].terrainType] == nil then
+								terrainFilledTiles[tileDictionary[tileName].terrainType] = 1
+							else
+								terrainFilledTiles[tileDictionary[tileName].terrainType] = terrainFilledTiles[tileDictionary[tileName].terrainType] + 1
+							end
 						end
 					end
 				elseif ny <= southPole or ny >= northPole then
@@ -1749,6 +1818,7 @@ local function expandRegion(tiles, regionIndex, regionName, maxArea, maxIteratio
 				end
 				if newCount >= maxArea then break end
 			end
+			if stopRegion == true then break end
 			table.remove(tileBuffer, bufferIndex)
 		until #tileBuffer <= 1 or newCount >= maxArea
 		tileBuffer = tempTiles
@@ -1763,6 +1833,21 @@ end
 
 
 local function growRegions()
+
+	-- restrict region size to biggest continent
+	print("biggest continent size", biggestContinentSize)
+	local halfBiggestContinentSize = math.ceil(biggestContinentSize / 2)
+	if regionMaxSize > biggestContinentSize then
+		print ("region maximum size", regionMaxSize, "reduced to", biggestContinentSize)
+		regionMaxSize = math.max(biggestContinentSize, smallestRegionSize * 2)
+	end
+	if regionMinSize > halfBiggestContinentSize then
+		print ("region minimum size", regionMinSize, "reduced to", halfBiggestContinentSize)
+		regionMinSize = math.max(halfBiggestContinentSize, smallestRegionSize)
+	end
+	regionAvgSize = (regionMinSize + regionMaxSize) / 2
+	maxRegions = math.floor( (4 * landArea) / regionAvgSize )
+	print("maximum regions", maxRegions)
 
 	-- gather available tiles to fill with regions
 	for nothing, xy in pairs(continentalXY) do

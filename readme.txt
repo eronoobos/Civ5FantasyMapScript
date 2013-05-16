@@ -1,16 +1,21 @@
--- add minimum to dice roll function (so that wet climates can more consistently put forests & jungles)
+-- add minimum to dice roll function (so that wet climates can more consistently put forests & jungles)?
 -- try to figure out what causes texture errors?
--- rename map options for clarity
-	-- continent size should be arranged small to large
-		-- same with continent shape (extra snakey to total blobs), region size, 
--- possibly make region size dependent upon map size (ginormous regions on a tiny map for instance, is just stupid)
--- possibly stop painting/expanding region when it hits the maximum or minimum latitude
 -- allow more than one ally, with probabilities for each and make the appearance of any ally dependent upon latitudes. (plains for example should have tundra, desert, and grassland)
 -- code change: regionIndex and regionName are now redundant. merge them.
 -- better system for figuring out where deep & shallow areas are for expanding coasts
 -- posibility of seperating regions with rivers?
 
 v14 --> v15
+-- climates tweaked a lot. no more terraintypes completely excluded from any climate, and hot and cool latitudes less extreme.
+-- map options tweaked a bit:
+	-- "normal" continent shape is now paintedratio 0.5, and default
+	-- most options now have "random" option
+-- rename map options for clarity
+	-- continent size should be arranged small to large
+		-- same with continent shape (extra snakey to total blobs), region size, 
+-- restrict region drawing to designated latitudes, with randomized tolerance for fewer straight horizontal edges
+-- World Age "Random" option works
+-- region sizes: the maximum must be no larger than the largest continent and no smaller than 10, and the minimum must be no larger than 1/2 the largest continent and no smaller than 5.
 -- mountains map option = "World Age" thousands of years
 -- improve latitude sensitive terraintype selection: if none of the terrains in tmult are allowed at the latitude, then find the terraintype with the largest distance from the specified latitude to the terrain's maximum and minimum.
 	-- also, the randomization should be a random chance to select an *allowed* terrain (new list generated each latitude), not just blindly selecting one at random until it's ok
