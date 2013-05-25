@@ -297,9 +297,9 @@ local function setBeforeOptions()
 		cSizeMax = 1300
 	elseif Map.GetCustomOption(3) == 5 then -- pangaea
 		pangaea = true
-		cSizeMin = 120
-		cSizeMax = 925
-		ismuthChance = 0.2
+		cSizeMin = 11
+		cSizeMax = 180
+		ismuthChance = 1.0
 	elseif Map.GetCustomOption(3) == 6 then -- random
 		cSizeMin = math.ceil( ((math.random() ^ 1.44) * 158) + 12 )
 		cSizeMax = math.ceil( cSizeMin * 7.7 )
@@ -444,6 +444,13 @@ local function setAfterOptions()
 		southPole = -1
 		northPole = yMax
 		evadePoles = false
+	end
+
+	--expand pangaea "continent size maximum" to half of land area
+	-- and half the number of islands
+	if Map.GetCustomOption(3) == 5 then
+		islandRatio = islandRatio / 2
+		cSizeMax = math.ceil( (landArea * (1 - islandRatio)) / 2 )
 	end
 
 end
@@ -1568,7 +1575,7 @@ local function growContinents()
 			print("no empty spot found for continent")
 			break
 		else
-			if pangaea == true and continentSize > islandSizeMax then
+			if pangaea == true and (continentSize > islandSizeMax or #cSizeTheory == 0) then
 				x = math.floor(xMax / 2)
 				y = math.floor(yMax / 2)
 			end

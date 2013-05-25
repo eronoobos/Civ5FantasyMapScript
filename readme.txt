@@ -7,6 +7,7 @@
 -- posibility of seperating regions with rivers?
 
 v15 --> v16
+-- pangaea shape much improved (ismuthChance = 1.0; cSizeMin = 11; cSizeMax = 1/2 non-island land area)
 -- preplanned landmass sizes
 -- control over amount of islands as a ratio of the total land area
 -- islands now seperate from pangaea landmass
