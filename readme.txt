@@ -7,9 +7,9 @@
 -- posibility of seperating regions with rivers?
 
 v15 --> v16
--- control over amount of islands
+-- preplanned landmass sizes
+-- control over amount of islands as a ratio of the total land area
 -- islands now seperate from pangaea landmass
--- amount of islands adjusted to ocean size & continent size
 -- continent size distribution earth-like
 -- absolute continent ("landmass"?) size
 

@@ -50,7 +50,7 @@ function GetMapScriptInfo()
 			{
                 Name = "Continent Size",
                 Values = {
-					"Quite Small",
+					"Tiny",
 					"Small",
 					"Medium",
 					"Big",
@@ -81,7 +81,8 @@ function GetMapScriptInfo()
 					"Few",
 					"Some",
 					"Lots",
-					"All",
+					"Tons",
+					"Random",
                 },
                 DefaultValue = 3,
                 SortPriority = 1,
@@ -148,10 +149,8 @@ local mountainRatio = 0.15
 local coastRangeSizeMin = 0.4
 local coastRangeSizeMax = 0.6
 local rangeHillRatio = 0.4
-local cSizeMin = 0.1
-local cSizeMax = 1
-local cSizeRandom = false
-local cSizeMaxCutoff = 10
+local cSizeMin = 11
+local cSizeMax = 50
 local iceChance = 0.5
 local atollChance = 0.2
 local coastExpandChance = 0.1
@@ -176,8 +175,8 @@ local rainfall = 2
 local directednessTotal = 3
 local eighthFavoringTotal = 4
 local latitudeTolerance = 5
-local islandChance = 0.5
-local islandyness = 1.0
+local islandRatio = 0.1
+local islandSizeMax = 10
 
 ----
 
@@ -232,6 +231,21 @@ local biggestContinentSize = 0
 ----
 
 
+local function diceRoll(dice, invert, maximum)
+	if invert == nil then invert = false end
+	if maximum == nil then maximum = 1.0 end
+	local n = 0
+	for d = 1, dice do
+		n = n + (math.random() / dice)
+	end
+	if invert == true then
+		if n >= 0.5 then n = n - 0.5 else n = n + 0.5 end
+	end
+	n = n * maximum
+	return n
+end
+
+
 local function setBeforeOptions()
 	-- ocean size
 	if Map.GetCustomOption(1) == 1 then
@@ -269,33 +283,27 @@ local function setBeforeOptions()
 	end
 
 		-- continent size
-	if Map.GetCustomOption(3) == 1 then -- quite small
-		cSizeMin = 12
-		cSizeMax = 65
-		islandChance = 0.15
+	if Map.GetCustomOption(3) == 1 then -- tiny
+		cSizeMin = 11
+		cSizeMax = 50
 	elseif Map.GetCustomOption(3) == 2 then -- small
 		cSizeMin = 25
 		cSizeMax = 200
-		islandChance = 0.3
 	elseif Map.GetCustomOption(3) == 3 then -- medium
 		cSizeMin = 70
 		cSizeMax = 540
-		islandChance = 0.5
 	elseif Map.GetCustomOption(3) == 4 then -- big
 		cSizeMin = 170
 		cSizeMax = 1300
-		islandChance = 0.55
 	elseif Map.GetCustomOption(3) == 5 then -- pangaea
 		pangaea = true
 		cSizeMin = 120
 		cSizeMax = 925
-		islandChance = 0.25
 		ismuthChance = 0.2
 	elseif Map.GetCustomOption(3) == 6 then -- random
 		cSizeMin = math.ceil( ((math.random() ^ 1.44) * 158) + 12 )
 		cSizeMax = math.ceil( cSizeMin * 7.7 )
 		print("random min size: ", cSizeMin, "  random max size: ", cSizeMax)
-		islandChance = ((cSizeMin ^ 0.333) / 8.2)
 	end
 
 	-- continent shape
@@ -319,20 +327,19 @@ local function setBeforeOptions()
 
 	-- island amount
 	if Map.GetCustomOption(5) == 1 then --none
-		islandyness = 0.0
+		islandRatio = 0.0
 	elseif Map.GetCustomOption(5) == 2 then --few
-		islandyness = 0.9
+		islandRatio = 0.03
 	elseif Map.GetCustomOption(5) == 3 then --some
-		islandyness = 1.4
+		islandRatio = 0.06
 	elseif Map.GetCustomOption(5) == 4 then --lots
-		islandyness = 1.8
-	elseif Map.GetCustomOption(5) == 5 then --all
-		islandyness = 2.0
-		cSizeRandom = true
+		islandRatio = 0.25
+	elseif Map.GetCustomOption(5) == 5 then -- tons
+		islandRatio = 0.5
+	elseif Map.GetCustomOption(5) == 6 then -- random
+		islandRatio = (diceRoll(3, false, 1) ^ 3) * 0.5
+		print("random island percentage: ", math.floor(islandRatio * 100))
 	end
-	print(islandChance)
-	islandChance = islandChance * islandyness * (1 - landRatio)
-	print(islandChance, islandyness, (1-landRatio))
 
 	-- world age
 	if Map.GetCustomOption(6) == 1 then
@@ -830,20 +837,6 @@ local function setNesses()
 end
 
 
-local function diceRoll(dice, invert, maximum)
-	if invert == nil then invert = false end
-	if maximum == nil then maximum = 1.0 end
-	local n = 0
-	for d = 1, dice do
-		n = n + (math.random() / dice)
-	end
-	if invert == true then
-		if n >= 0.5 then n = n - 0.5 else n = n + 0.5 end
-	end
-	n = n * maximum
-	return n
-end
-
 local function generateRegionType(latitude)
 	local largeBrushChance = math.random(1,10)
 	local rotationType = math.random(0,1)
@@ -1069,6 +1062,28 @@ local function pairEm(a, b)
 	else
 		return bs .. as
 	end
+end
+
+
+local function findClosest(number, list)
+	local smallest = 10000
+	local closest
+	for i, v in pairs(list) do
+		local dist
+		if v > number then
+			dist = v - number
+		elseif v < number then
+			dist = number - v
+		else
+			--dist = 0
+			return i
+		end
+		if dist < smallest then
+			smallest = dist
+			closest = i
+		end
+	end
+	return closest
 end
 
 
@@ -1458,6 +1473,34 @@ local function expandContinent(tiles, id, maxArea, maxIterations, isolateContine
 end
 
 
+local function planContinentSizes()
+-- create idealized list of continent sizes
+-- growContinents() picks from this list at random
+	local islandArea = math.ceil( islandRatio * landArea )
+	local theory = {}
+	local left = landArea
+	local cleft = landArea - islandArea
+	print(cleft, islandArea)
+	local i = 1
+	repeat
+		local size = 0
+		if left <= islandArea then
+			local maximum = math.min(islandSizeMax, left)
+			size = math.random(1, maximum)
+		else
+			local c = math.ceil( math.random(cSizeMin, cSizeMax) )
+			size = math.min(c, cleft)
+		end
+		theory[i] = size
+		left = left - size
+		cleft = cleft - size
+		print(i, size, left)
+		i = i + 1
+	until left <= 0
+	return theory
+end
+
+
 local function growContinents()
 	-- fill stillOcean with all tiles
 	for i=1, mapArea do
@@ -1468,6 +1511,8 @@ local function growContinents()
 
 	-- fill quadrants with all tiles
 	fillQuadrants()
+
+	local cSizeTheory = planContinentSizes()
 
 	local oceanArea = mapArea - landArea
 
@@ -1483,34 +1528,13 @@ local function growContinents()
 	local blockedTileCount = 0
 	repeat
 		local left = landArea - continentalTotalTiles
-		local continentSize
 		print("land area left to fill", left)
-		local island = cSizeRandom
-		if cSizeRandom == false and math.random() < islandChance then
-			island = true
-		end
-		if island == true then
-			print("island")
-			local maximum = left
-			if cSizeMaxCutoff ~= nil and left >= cSizeMaxCutoff then
-				maximum = cSizeMaxCutoff
-			end
-			continentSize = math.random(1, maximum)
+		local continentSize = left
+		if #cSizeTheory > 0 then
+			local csti = math.random(1,#cSizeTheory)
+			continentSize = cSizeTheory[csti]
 		else
---			local m = math.random(cSizeMin, cSizeMax)
---			continentSize = math.min(math.ceil(m), left)
-
-			if left >= cSizeMin then
-				local m = math.random(cSizeMin, cSizeMax)
-				continentSize = math.min(math.floor(m), left)
-			elseif left > 20 then
-				print("less than continent minimum land area left, rationing")
-				continentSize = math.ceil(math.random(left*0.5,left*0.75))
-			else
-				print("less than continent minimum land area left, taking")
-				continentSize = left
-			end
-
+			print("end of continent size plans")
 		end
 
 		local noBlockingChance = (blockedTileCount / oceanArea) / 2
@@ -1544,7 +1568,7 @@ local function growContinents()
 			print("no empty spot found for continent")
 			break
 		else
-			if pangaea == true and island == false then
+			if pangaea == true and continentSize > islandSizeMax then
 				x = math.floor(xMax / 2)
 				y = math.floor(yMax / 2)
 			end
@@ -1565,6 +1589,13 @@ local function growContinents()
 			actualContinentSize = actualContinentSize + #expandedTiles
 		end
 		if actualContinentSize > biggestContinentSize then biggestContinentSize = actualContinentSize end
+
+		-- finding the closest match in the continent size list and removing it
+		if actualContinentSize > 0 and #cSizeTheory > 0 then
+			local closest = findClosest(actualContinentSize, cSizeTheory)
+			print("actual size", actualContinentSize, "  closest match", cSizeTheory[closest])
+			table.remove(cSizeTheory, closest)
+		end
 
 		-- clear occupied continental tiles from available ocean tile list
 		-- if the continent wasn't able to grow at all, remove its starting tile and neighbors from possibility
