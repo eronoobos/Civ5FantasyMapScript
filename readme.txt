@@ -1,12 +1,16 @@
+-- allow more than one ally, with probabilities for each and make the appearance of any ally dependent upon latitudes. (plains for example should have tundra, desert, and grassland)
 -- instead of base tile, any unoccupied continental tiles should be filled with a region as every other, which leaves the question why aren't they getting filled as normal by growRegions?
 -- add minimum to dice roll function (so that wet climates can more consistently put forests & jungles)?
 -- try to figure out what causes texture errors?
--- allow more than one ally, with probabilities for each and make the appearance of any ally dependent upon latitudes. (plains for example should have tundra, desert, and grassland)
 -- code change: regionIndex and regionName are now redundant. merge them.
 -- better system for figuring out where deep & shallow areas are for expanding coasts
 -- posibility of seperating regions with rivers?
 
 v15 --> v16
+-- control over amount of islands
+-- islands now seperate from pangaea landmass
+-- amount of islands adjusted to ocean size & continent size
+-- continent size distribution earth-like
 -- absolute continent ("landmass"?) size
 
 v14 --> v15
