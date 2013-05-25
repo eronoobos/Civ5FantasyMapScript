@@ -1,3 +1,4 @@
+-- instead of base tile, any unoccupied continental tiles should be filled with a region as every other, which leaves the question why aren't they getting filled as normal by growRegions?
 -- add minimum to dice roll function (so that wet climates can more consistently put forests & jungles)?
 -- try to figure out what causes texture errors?
 -- allow more than one ally, with probabilities for each and make the appearance of any ally dependent upon latitudes. (plains for example should have tundra, desert, and grassland)
@@ -5,12 +6,15 @@
 -- better system for figuring out where deep & shallow areas are for expanding coasts
 -- posibility of seperating regions with rivers?
 
+v15 --> v16
+-- absolute continent ("landmass"?) size
+
 v14 --> v15
 -- randomized latitudes if random climate
 -- region sizes lessened and smaller variance
 -- climates tweaked a lot. no more terraintypes completely excluded from any climate, and hot and cool latitudes less extreme.
 -- map options tweaked a bit:
-	-- "normal" continent shape is now paintedratio 0.5, and default
+	-- "normal" continent shape is now paintedratio 0.5
 	-- most options now have "random" option
 -- rename map options for clarity
 	-- continent size should be arranged small to large

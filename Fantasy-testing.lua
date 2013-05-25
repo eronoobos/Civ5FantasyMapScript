@@ -1,6 +1,6 @@
 -- Map Script: Fantasy
 -- Author: zoggop
--- version 15
+-- version 16
 
 --------------------------------------------------------------
 if include == nil then
@@ -140,7 +140,7 @@ local rangeHillRatio = 0.4
 local cSizeMin = 0.1
 local cSizeMax = 1
 local cSizeRandom = false
-local cSizeMaxCutoff = nil
+local cSizeMaxCutoff = 10
 local iceChance = 0.5
 local atollChance = 0.2
 local coastExpandChance = 0.1
@@ -148,7 +148,6 @@ local coastRecedeChance = 1
 local ismuthChance = 0
 local levelMountains = 0
 local mountainThickness = 0.0
-local connectedRatio = 0.33
 local coastLimitMin = 1
 local coastLimitMax = 8
 local skinnyMountainRanges = false
@@ -166,6 +165,8 @@ local rainfall = 2
 local directednessTotal = 3
 local eighthFavoringTotal = 4
 local latitudeTolerance = 5
+local islandChance = 0.5
+local islandyness = 1.0
 
 ----
 
@@ -261,17 +262,21 @@ local function setBeforeOptions()
 		cSizeRandom = true
 		cSizeMaxCutoff = 10
 	elseif Map.GetCustomOption(3) == 2 then -- quite small
-		cSizeMin = 0.12
-		cSizeMax = 0.06
+		cSizeMin = 25
+		cSizeMax = 50
+		islandChance = 0.1 * islandyness
 	elseif Map.GetCustomOption(3) == 3 then -- small
-		cSizeMin = 0.3
-		cSizeMax = 0.2
+		cSizeMin = 75
+		cSizeMax = 150
+		islandChance = 0.3  * islandyness
 	elseif Map.GetCustomOption(3) == 4 then -- medium
-		cSizeMin = 0.4
-		cSizeMax = 0.4
+		cSizeMin = 250
+		cSizeMax = 500
+		islandChance = 0.5 * islandyness
 	elseif Map.GetCustomOption(3) == 5 then -- big
-		cSizeMin = 0.4
-		cSizeMax = 0.75
+		cSizeMin = 500
+		cSizeMax = 1000
+		islandChance = 0.6 * islandyness
 	elseif Map.GetCustomOption(3) == 6 then -- pangaea
 		pangaea = true
 		cSizeMin = 0.4
@@ -1450,34 +1455,35 @@ local function growContinents()
 	local coastLevel = {}
 	local blockedTileCount = 0
 	repeat
-		local continentSize = landArea - continentalTotalTiles
-		print("land area left to fill", continentSize)
-		if cSizeRandom then
-			if continentSize <= 10 then
+		local left = landArea - continentalTotalTiles
+		local continentSize
+		print("land area left to fill", left)
+		local island = cSizeRandom
+		if cSizeRandom == false and math.random() < islandChance then
+			island = true
+		end
+		if island == true then
+			if left <= 10 then
 				continentSize = 1
-			elseif continentSize <= 20 then
+			elseif left <= 20 then
 				continentSize = 2
-			elseif continentSize <= 30 then
+			elseif left <= 30 then
 				continentSize = 3
 			else
 				local minimum = 1
-				local maximum = continentSize
+				local maximum = left
 				if cSizeMaxCutoff ~= nil then maximum = cSizeMaxCutoff end
 				continentSize = math.random(minimum, maximum)
 			end
 		else
-			local p = continentSize / landArea
-			local a = cSizeMin
-			local b = cSizeMax - cSizeMin
-			local m = a + (b * p)
-			m = diceRoll(3, true, b) + a
-			continentSize = math.floor(m * continentSize)
+			--if left >= cSizeMin then
+				local m = math.random(cSizeMin, cSizeMax)
+				continentSize = math.min(math.floor(m), left)
+			--else
+			--	continentSize = math.ceil(math.random(left*0.5,left*0.67))
+			--end
 		end
-		--DEBUG
---		continentSize = math.floor(diceRoll(8, true, 0.33) * landArea)
---		continentSize = math.min(continentSize, math.floor((landArea - continentalTotalTiles) / 2))
---		continentSize = math.floor( (#stillOcean) * diceRoll(8, true, 0.15) )
-		connectedRatio = 0.25
+
 		local noBlockingChance = (blockedTileCount / oceanArea) / 2
 		local connectedChance = noBlockingChance
 --		print("chance not to generate blocking", noBlockingChance)
