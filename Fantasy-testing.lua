@@ -1,6 +1,6 @@
 -- Map Script: Fantasy
 -- Author: zoggop
--- version 16
+-- version 17
 
 --------------------------------------------------------------
 if include == nil then
@@ -146,8 +146,6 @@ local evadePoles = true
 local keepItInside = true
 local coastRangeRatio = 0.3
 local mountainRatio = 0.15
-local coastRangeSizeMin = 0.4
-local coastRangeSizeMax = 0.6
 local rangeHillRatio = 0.4
 local cSizeMin = 11
 local cSizeMax = 50
@@ -343,25 +341,25 @@ local function setBeforeOptions()
 
 	-- world age
 	if Map.GetCustomOption(6) == 1 then
-		mountainRatio = 0.5
+		mountainRatio = 0.25
 		coastRangeRatio = 0.35
-		rangeHillRatio = 0.2
+		rangeHillRatio = 0.25
 		hillsness = 0.9
 	elseif Map.GetCustomOption(6) == 2 then
-		mountainRatio = 0.25
+		mountainRatio = 0.1
 		coastRangeRatio = 0.3
-		rangeHillRatio = 0.25
+		rangeHillRatio = 0.3
 		hillsness = 0.75
 	elseif Map.GetCustomOption(6) == 3 then
-		mountainRatio = 0.1
+		mountainRatio = 0.03
 		coastRangeRatio = 0.25
-		rangeHillRatio = 0.3
+		rangeHillRatio = 0.35
 		hillsness = 0.6
 	elseif Map.GetCustomOption(6) == 4 then
-		mountainRatio = 0.05
+		mountainRatio = 0.015
 		coastRangeRatio = 0.2
 		skinnyMountainRanges = true
-		rangeHillRatio = 0.35
+		rangeHillRatio = 0.4
 		hillsness = 0.5
 	elseif Map.GetCustomOption(6) == 5 then
 		mountainRatio = 0.0
@@ -370,7 +368,7 @@ local function setBeforeOptions()
 	elseif Map.GetCustomOption(6) == 6 then
 		local mountainsFrodoMountains = math.random()
 		print("random mountainousness, 0 to 100: ", math.floor(mountainsFrodoMountains * 100))
-		mountainRatio = (mountainsFrodoMountains ^ 2.3) * 0.5
+		mountainRatio = (mountainsFrodoMountains ^ 3.05) * 0.25
 		coastRangeRatio = (mountainsFrodoMountains * 0.2) + 0.15
 		rangeHillRatio = ((1 - mountainsFrodoMountains) * 0.2) + 0.2
 		hillsness = (mountainsFrodoMountains * 0.65) + 0.25
@@ -2200,7 +2198,7 @@ local function findRangeTiles()
 end
 
 
-local function raiseRange(range, area, rangeSizeMin, rangeSizeMax)
+local function raiseRange(range, area)
 	if area == 0 then return 0 end
 	local rangeBuffer = {}
 	for rangeIndex, localRange in pairs(range) do
@@ -2525,14 +2523,14 @@ function GeneratePlotTypes()
 		local coastRangeArea = math.floor(mountainAreaLeft * coastRangeRatio)
 		local regionRangeArea = mountainAreaLeft - coastRangeArea
 		print("setting inter region range plots...")
-		local rraised = raiseRange(regionRange, regionRangeArea, rangeSizeMin, rangeSizeMax)
+		local rraised = raiseRange(regionRange, regionRangeArea)
 		if rraised == nil then rraised = 0 end
 		if rraised < regionRangeArea then
 			coastRangeArea = coastRangeArea + (regionRangeArea - rraised)
 			print("only", rraised, "region range raised out of", regionRangeArea, "coast range increased by", regionRangeArea - rraised, "to", coastRangeArea)
 		end
 		print("setting coast range plots...")
-		local craised = raiseRange(coastRange, coastRangeArea, coastRangeSizeMin, coastRangeSizeMax)
+		local craised = raiseRange(coastRange, coastRangeArea)
 	end
 
 	local args = { bExpandCoasts = false }

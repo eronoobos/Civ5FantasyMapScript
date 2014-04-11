@@ -6,6 +6,9 @@
 -- better system for figuring out where deep & shallow areas are for expanding coasts
 -- posibility of seperating regions with rivers?
 
+v16 --> v18
+-- cut mountainousness to about 1/3 of before, to match default Continent script better
+
 v15 --> v16
 -- pangaea shape much improved (ismuthChance = 1.0; cSizeMin = 11; cSizeMax = 1/2 non-island land area)
 -- preplanned landmass sizes
@@ -13,6 +16,11 @@ v15 --> v16
 -- islands now seperate from pangaea landmass
 -- continent size distribution earth-like
 -- absolute continent ("landmass"?) size
+
+- continent size is now absolute, no longer dependent upon map area & ocean size
+- control over amount of islands as a ratio of the land area
+- islands now seperate from pangaea landmass
+- pangaea shape much improved (less patchy, fewer tiny isthmuses)
 
 v14 --> v15
 -- randomized latitudes if random climate
