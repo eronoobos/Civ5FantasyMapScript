@@ -122,6 +122,19 @@ function GetMapScriptInfo()
                 DefaultValue = 1,
                 SortPriority = 1,
             },
+            {
+            	Name = "Mountain Clumpiness",
+            	Values = {
+            		"Epic Clumps",
+            		"Normal",
+            		"Scattered",
+            		"Very Scattered",
+            		"Completely Scattered",
+            	},
+            	DefaultValue = 2,
+            	SortPriority = 1,
+            }
+        	},
 			temperature,
 			rainfall,
 			resources},
@@ -147,6 +160,7 @@ local keepItInside = true
 local coastRangeRatio = 0.3
 local mountainRatio = 0.15
 local rangeHillRatio = 0.4
+local mountainClumpiness = 0.75
 local cSizeMin = 11
 local cSizeMax = 50
 local iceChance = 0.5
@@ -203,6 +217,8 @@ local coastRange = { }
 local regionRange = { }
 local isCoastRange = { }
 local isRegionRange = { }
+local regionRangeTileCount = 0
+local coastRangeTileCount = 0
 local stillOcean = {}
 local soQuad = { {}, {}, {}, {} }
 local featureAtoll
@@ -430,6 +446,22 @@ local function setBeforeOptions()
 		rainfall = 3
 	elseif Map.GetCustomOption(10) == 4 then
 		rainfall = -1
+	end
+
+	--mountain clumpiness
+	local mountainClumpinessOption = Map.GetCustomOption(11)
+	if mountainClumpinessOption ~= nil then
+		if mountainClumpinessOption == 1 then
+			mountainClumpiness = 1.0
+		elseif mountainClumpinessOption == 2 then
+			mountainClumpiness = 0.75
+		elseif mountainClumpinessOption == 3 then
+			mountainClumpiness = 0.5
+		elseif mountainClumpinessOption == 4 then
+			mountainClumpiness = 0.25
+		elseif mountainClumpinessOption == 5 then
+			mountainClumpiness = 0.0
+		end
 	end
 
 end
@@ -2124,7 +2156,7 @@ local function mountainLineCheck(x, y)
 	return goodD
 end
 
-
+-- find mountain range lines (along coasts and between regions), seperated into ranges
 local function findRangeTiles()
 	for i, xy in pairs(continentalXY) do
 		local x = xy.x
@@ -2182,6 +2214,7 @@ local function findRangeTiles()
 --			print(rangeIndex, regionalTiles[index].regionIndex, lastOther)
 			if regionRange[rangeIndex] == nil then regionRange[rangeIndex] = {} end
 			table.insert(regionRange[rangeIndex], index)
+			regionRangeTileCount = regionRangeTileCount + 1
 --			print(i, x, y, index, selfCount, otherCount, oceanCount, regionName, "region")
 		-- before: oceanCount > 0 and oceanCount < 4 and rCount < 5
 		elseif oceanCount > 0 then
@@ -2192,13 +2225,23 @@ local function findRangeTiles()
 			end
 			if coastRange[rangeIndex] == nil then coastRange[rangeIndex] = {} end
 			table.insert(coastRange[rangeIndex], index)
+			coastRangeTileCount = coastRangeTileCount + 1
 --			print(i, x, y, index, selfCount, otherCount, oceanCount, regionName, "coast")
 		end
 	end
 end
 
-
-local function raiseRange(range, area)
+-- collect tiles to be potentially mountainous from coast range and region range
+local function collectRange(range, totalArea, perscribedArea)
+	perscribedArea = perscribedArea + math.ceil((rangeHillRatio+0.05) * perscribedArea) -- to account for some collected tiles becoming hills
+	local areaDifference = totalArea - perscribedArea
+	local area = 0
+	if areaDifference <= 0 then 
+		area = totalArea
+	else
+		area = totalArea - (areaDifference * mountainClumpiness)
+	end
+	print(totalArea, perscribedArea, areaDifference, area)
 	if area == 0 then return 0 end
 	local rangeBuffer = {}
 	for rangeIndex, localRange in pairs(range) do
@@ -2206,8 +2249,13 @@ local function raiseRange(range, area)
 	end
 	if #rangeBuffer <= 1 then return nil end
 
-	local mountainTiles = {}
-	local raisedTiles = 0
+	local originalArea = 0
+	if uniformMountainRanges then
+		originalArea = area + 0
+		area = mapArea + 0
+	end
+	local tilesCollected = 0
+	local collection = {}
 	repeat
 		local bufferIndex = math.random(1, #rangeBuffer)
 		local rangeIndex = rangeBuffer[bufferIndex]
@@ -2231,26 +2279,46 @@ local function raiseRange(range, area)
 			local check = true
 			if skinnyMountainRanges == true then check = mountainLineCheck(x, y) end
 			if check == true then
-				local plot = Map.GetPlotByIndex(index - 1)
-				if plot ~= nil then
-					if math.random() < rangeHillRatio then
-						plot:SetPlotType(PlotTypes.PLOT_HILLS, false, false)
-						--raisedTiles = raisedTiles + 0.5
-					else
-						plot:SetPlotType(PlotTypes.PLOT_MOUNTAIN, false, false)
-						table.insert(mountainTiles, index)
-						raisedTiles = raisedTiles + 1
-					end
-				end
+				table.insert(collection, index)
+				tilesCollected = tilesCollected + 1
 			end
-			if raisedTiles >= area then break end
+			if tilesCollected >= area then break end
 		end
 		table.remove(rangeBuffer, bufferIndex)
-	until raisedTiles >= area or #rangeBuffer == 0
-	print(raisedTiles, "tiles raised of", area)
+	until tilesCollected >= area or #rangeBuffer == 0
+	print(tilesCollected, "tiles collected of", totalArea)
+	return collection
+end
 
-	--if not enough tiles raised, expand mountains at random
-	if raisedTiles < area and #mountainTiles > 0 then
+-- raise collected range tiles at random
+local function raiseRange(collection, area)
+	local buffer = {}
+	for i = 1, #collection do
+		table.insert(buffer, collection[i])
+	end
+	local tilesRaised = 0
+	local mountainTiles = {}
+	repeat
+		local index = table.remove(buffer, math.random(1, #buffer))
+		local plot = Map.GetPlotByIndex(index - 1)
+		if plot ~= nil then
+			if math.random() < rangeHillRatio then
+				plot:SetPlotType(PlotTypes.PLOT_HILLS, false, false)
+				--tilesRaised = tilesRaised + 0.5
+			else
+				plot:SetPlotType(PlotTypes.PLOT_MOUNTAIN, false, false)
+				table.insert(mountainTiles, index)
+				tilesRaised = tilesRaised + 1
+			end
+		end
+	until tilesRaised >= area or #buffer == 0
+	print(tilesRaised, "tiles raised of", area)
+	return tilesRaised, mountainTiles
+end
+
+--if not enough tiles raised, expand mountains at random
+local function expandMountains(tilesRaised, area, mountainTiles)
+	if tilesRaised < area and #mountainTiles > 0 then
 		local mountainBuffer = mountainTiles
 		local noChange = 0
 		repeat
@@ -2272,12 +2340,12 @@ local function raiseRange(range, area)
 						plot:SetPlotType(PlotTypes.PLOT_HILLS, false, false)
 						table.insert(mountainBuffer, dindex)
 						noChange = 0
-						--raisedTiles = raisedTiles + 0.5
+						--tilesRaised = tilesRaised + 0.5
 					elseif plot:GetPlotType() ~= PlotTypes.PLOT_MOUNTAIN and plot:GetPlotType() ~= PlotTypes.PLOT_HILLS then
 						plot:SetPlotType(PlotTypes.PLOT_MOUNTAIN, false, false)
 						table.insert(mountainBuffer, dindex)
 						--table.remove(mountainBuffer, bufferIndex)
-						raisedTiles = raisedTiles + 1
+						tilesRaised = tilesRaised + 1
 						noChange = 0
 					else
 						noChange = noChange + 1
@@ -2286,14 +2354,23 @@ local function raiseRange(range, area)
 					noChange = noChange + 1
 				end
 				table.remove(dirs, di)
-			until #dirs == 0 or raisedTiles >= area
+			until #dirs == 0 or tilesRaised >= area
 			table.remove(mountainBuffer, bufferIndex)
-		until raisedTiles >= area or noChange > 36 or #mountainBuffer == 0
-		print(raisedTiles, "tiles raised of", area)
+		until tilesRaised >= area or noChange > 36 or #mountainBuffer == 0
+		print(tilesRaised, "tiles raised of", area, "(after expansion)")
 	end
-	return raisedTiles
+	return tilesRaised
 end
 
+local function doRange(range, totalArea, perscribedArea)
+	print("collecting range tiles...")
+	local collection = collectRange(range, totalArea, perscribedArea)
+	print("raising range tiles...")
+	local tilesRaised, mountainTiles = raiseRange(collection, perscribedArea)
+	print("expanding mountains...")
+	local tilesRaised = expandMountains(tilesRaised, perscribedArea, mountainTiles)
+	return tilesRaised
+end
 
 local function popIce(index, noCoast)
 	local plot = Map.GetPlotByIndex(index - 1)
@@ -2522,20 +2599,19 @@ function GeneratePlotTypes()
 		local mountainAreaLeft = totalMountainArea - mountainCount
 		local coastRangeArea = math.floor(mountainAreaLeft * coastRangeRatio)
 		local regionRangeArea = mountainAreaLeft - coastRangeArea
-		print("setting inter region range plots...")
-		local rraised = raiseRange(regionRange, regionRangeArea)
-		if rraised == nil then rraised = 0 end
-		if rraised < regionRangeArea then
-			coastRangeArea = coastRangeArea + (regionRangeArea - rraised)
-			print("only", rraised, "region range raised out of", regionRangeArea, "coast range increased by", regionRangeArea - rraised, "to", coastRangeArea)
+		print("inter-region range:")
+		local rTilesRaised = doRange(regionRange, regionRangeTileCount, regionRangeArea)
+		if rTilesRaised == nil then rTilesRaised = 0 end
+		if rTilesRaised < regionRangeArea then
+			coastRangeArea = coastRangeArea + (regionRangeArea - rTilesRaised)
+			print("only", rTilesRaised, "region range raised out of", regionRangeArea, "coast range increased by", regionRangeArea - rTilesRaised, "to", coastRangeArea)
 		end
-		print("setting coast range plots...")
-		local craised = raiseRange(coastRange, coastRangeArea)
+		print("coast range:")
+		local cTilesRaised = doRange(coastRange, coastRangeTileCount, coastRangeArea)
 	end
 
 	local args = { bExpandCoasts = false }
 	GenerateCoasts(args)
-
 
 end
 
