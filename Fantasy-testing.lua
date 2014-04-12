@@ -122,7 +122,10 @@ function GetMapScriptInfo()
                 DefaultValue = 1,
                 SortPriority = 1,
             },
-            {
+			temperature,
+			rainfall,
+			resources,
+			{
             	Name = "Mountain Clumpiness",
             	Values = {
             		"Epic Clumps",
@@ -133,11 +136,8 @@ function GetMapScriptInfo()
             	},
             	DefaultValue = 2,
             	SortPriority = 1,
-            }
-        	},
-			temperature,
-			rainfall,
-			resources},
+            },
+		},
 	};
 end
 
@@ -449,7 +449,7 @@ local function setBeforeOptions()
 	end
 
 	--mountain clumpiness
-	local mountainClumpinessOption = Map.GetCustomOption(11)
+	local mountainClumpinessOption = Map.GetCustomOption(12)
 	if mountainClumpinessOption ~= nil then
 		if mountainClumpinessOption == 1 then
 			mountainClumpiness = 1.0
