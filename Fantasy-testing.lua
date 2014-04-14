@@ -157,6 +157,15 @@ local rainfallOption = Map.GetCustomOption(11)
 
 ----------------------------------------------------------------------------------
 
+local mRandom = math.random
+local mCeil = math.ceil
+local mFloor = math.floor
+local mMin = math.min
+local mMax = math.max
+local mAbs = math.abs
+
+----------------------------------------------------------------------------------
+
 local landRatio = 0.5
 local regionNoExpandRatio = 0.333
 local continentLargeBrushChance = 15
@@ -206,7 +215,7 @@ local islandSizeMax = 10
 
 ----
 
-local regionAvgSize = math.floor( (regionMinSize + regionMaxSize) / 2 )
+local regionAvgSize = mFloor( (regionMinSize + regionMaxSize) / 2 )
 
 local iW
 local iH
@@ -242,6 +251,8 @@ local regions = {}
 local mountainCount = 0
 local isCoast = {}
 local terrainAlly = {}
+local terrainAllies = {}
+local terrainAlliesRoll = {}
 local terrainList = {}
 local terrains = {}
 local fness = {}
@@ -273,7 +284,7 @@ local function diceRoll(dice, invert, maximum)
 	if maximum == nil then maximum = 1.0 end
 	local n = 0
 	for d = 1, dice do
-		n = n + (math.random() / dice)
+		n = n + (mRandom() / dice)
 	end
 	if invert == true then
 		if n >= 0.5 then n = n - 0.5 else n = n + 0.5 end
@@ -300,7 +311,7 @@ local function setBeforeOptions()
 	elseif oceanSizeOption == 7 then
 		landRatio = 0.02
 	elseif oceanSizeOption == 8 then
-		landRatio = ((math.random() ^ 1.75) * 0.92) + 0.02
+		landRatio = ((mRandom() ^ 1.75) * 0.92) + 0.02
 		print("random land ratio: ", landRatio)
 	end
 
@@ -338,8 +349,8 @@ local function setBeforeOptions()
 		cSizeMax = 180
 		ismuthChance = 1.0
 	elseif continentSizeOption == 6 then -- random
-		cSizeMin = math.ceil( ((math.random() ^ 1.44) * 158) + 12 )
-		cSizeMax = math.ceil( cSizeMin * 7.7 )
+		cSizeMin = mCeil( ((mRandom() ^ 1.44) * 158) + 12 )
+		cSizeMax = mCeil( cSizeMin * 7.7 )
 		print("random min size: ", cSizeMin, "  random max size: ", cSizeMax)
 	end
 
@@ -358,7 +369,7 @@ local function setBeforeOptions()
 	elseif continentShapeOption == 6 then -- total blobs
 		paintedRatio = 0.1
 	elseif continentShapeOption == 7 then -- random
-		paintedRatio = (math.random() * 0.9) + 0.1
+		paintedRatio = (mRandom() * 0.9) + 0.1
 		print("random painted ratio: ", paintedRatio)
 	end
 
@@ -375,7 +386,7 @@ local function setBeforeOptions()
 		islandRatio = 0.5
 	elseif islandAmountOption == 6 then -- random
 		islandRatio = (diceRoll(3, false, 1) ^ 3) * 0.5
-		print("random island percentage: ", math.floor(islandRatio * 100))
+		print("random island percentage: ", mFloor(islandRatio * 100))
 	end
 
 	-- world age
@@ -405,8 +416,8 @@ local function setBeforeOptions()
 		levelMountains = 1.0
 		hillsness = 0.25
 	elseif worldAgeOption == 6 then
-		local mountainsFrodoMountains = math.random()
-		print("random mountainousness, 0 to 100: ", math.floor(mountainsFrodoMountains * 100))
+		local mountainsFrodoMountains = mRandom()
+		print("random mountainousness, 0 to 100: ", mFloor(mountainsFrodoMountains * 100))
 		mountainRatio = (mountainsFrodoMountains ^ 3.05) * 0.25
 		coastRangeRatio = (mountainsFrodoMountains * 0.2) + 0.15
 		rangeHillRatio = ((1 - mountainsFrodoMountains) * 0.2) + 0.2
@@ -430,9 +441,9 @@ local function setBeforeOptions()
 		regionMinSize = 140
 		regionMaxSize = 280
 	elseif regionSizeOption == 6 then -- random
-		local r = math.random()
-		regionMinSize = math.ceil( ((r * 295) ^ 0.67) + 5 )
-		regionMaxSize = math.ceil( ((r * 580) ^ 0.77) + 20 )
+		local r = mRandom()
+		regionMinSize = mCeil( ((r * 295) ^ 0.67) + 5 )
+		regionMaxSize = mCeil( ((r * 580) ^ 0.77) + 20 )
 		print("random region min size: ", regionMinSize, "  random region max size: ", regionMaxSize)
 	end
 
@@ -457,7 +468,7 @@ local function setBeforeOptions()
 		iceChance = 0.5
 	elseif temperatureOption == 4 then
 		temperature = -1
-		iceChance = (math.random() * 0.2) + 0.5
+		iceChance = (mRandom() * 0.2) + 0.5
 	end
 
 	--rainfall
@@ -502,7 +513,7 @@ local function setAfterOptions()
 	-- and half the number of islands
 	if continentSizeOption == 5 then
 		islandRatio = islandRatio / 2
-		cSizeMax = math.ceil( (landArea * (1 - islandRatio)) / 2 )
+		cSizeMax = mCeil( (landArea * (1 - islandRatio)) / 2 )
 	end
 
 end
@@ -653,12 +664,18 @@ end
 
 local function setNesses()
 
+	--[[
 	terrainAlly[terrainTundra] = terrainSnow
 	terrainAlly[terrainSnow] = terrainTundra
 	terrainAlly[terrainPlains] = terrainGrass
 	terrainAlly[terrainGrass] = terrainPlains
+	]]--
 
-	terrainAllies
+	terrainAllies[terrainSnow] = { terrainTundra }
+	terrainAllies[terrainTundra] = { terrainSnow, terrainPlains }
+	terrainAllies[terrainDesert] = { terrainPlains }
+	terrainAllies[terrainPlains] = { terrainGrass, terrainDesert, terrainTundra }
+	terrainAllies[terrainGrass] = { terrainPlains }
 
 	possibleFeatures[terrainGrass] = 4
 	possibleFeatures[terrainPlains] = 2
@@ -691,9 +708,9 @@ local function setNesses()
 	fcurve[FeatureTypes.FEATURE_JUNGLE] = { dice = 8, invert = true, maximum = 1.0, }
 
 	if temperature == -1 and rainfall ~= -1 then
-		temperature = math.random(1,3)
+		temperature = mRandom(1,3)
 	elseif rainfall == -1 and temperature ~= -1 then
-		rainfall = math.random(1,3)
+		rainfall = mRandom(1,3)
 	elseif temperature == -1 and rainfall == -1 then
 		pWorld = "Random"
 	end
@@ -858,7 +875,7 @@ local function setNesses()
 		tmult[terrainSnow] = 1
 		baseTile = "PlainsJungle"
 	elseif pWorld == "Random" then
-		local grasslat = math.random(30,50)
+		local grasslat = mRandom(30,50)
 		print("random max grass latitude", grasslat)
 		terrainLatitudes[terrainGrass] = { mini = 0, maxi = grasslat, }
 		terrainLatitudes[terrainPlains] = { mini = grasslat - 10, maxi = grasslat + 10, }
@@ -871,23 +888,23 @@ local function setNesses()
 		featureLatitudes[FeatureTypes.FEATURE_OASIS] = terrainLatitudes[terrainDesert]
 		featureLatitudes[FeatureTypes.FEATURE_ICE] = { mini = grasslat + 20, maxi = 90, }
 
-		fness[FeatureTypes.FEATURE_JUNGLE] = math.random()
-		fness[FeatureTypes.FEATURE_FOREST] = math.random()
-		fcurve[FeatureTypes.FEATURE_FOREST] = { dice = math.random(1,5), invert = true, maximum = math.min(math.random() * 1.5, 1), }
-		fcurve[FeatureTypes.FEATURE_JUNGLE] = { dice = math.random(1,5), invert = true, maximum = math.min(math.random() * 1.5, 1), }
-		fness[FeatureTypes.FEATURE_MARSH] = math.random() * 0.25
-		fcurve[FeatureTypes.FEATURE_MARSH] = { dice = 1, invert = false, maximum = math.random() * 0.4, }
-		fcurve[FeatureTypes.NO_FEATURE] = { dice = 1, invert = false, maximum = math.min(math.random()+0.5, 1), }
-		tmult[terrainGrass] = math.random(1,20)
-		tmult[terrainPlains] = math.random(1,20)
-		tmult[terrainDesert] = math.random(1,20)
-		tmult[terrainTundra] = math.random(1,20)
-		tmult[terrainSnow] = math.random(1,20)
+		fness[FeatureTypes.FEATURE_JUNGLE] = mRandom()
+		fness[FeatureTypes.FEATURE_FOREST] = mRandom()
+		fcurve[FeatureTypes.FEATURE_FOREST] = { dice = mRandom(1,5), invert = true, maximum = mMin(mRandom() * 1.5, 1), }
+		fcurve[FeatureTypes.FEATURE_JUNGLE] = { dice = mRandom(1,5), invert = true, maximum = mMin(mRandom() * 1.5, 1), }
+		fness[FeatureTypes.FEATURE_MARSH] = mRandom() * 0.25
+		fcurve[FeatureTypes.FEATURE_MARSH] = { dice = 1, invert = false, maximum = mRandom() * 0.4, }
+		fcurve[FeatureTypes.NO_FEATURE] = { dice = 1, invert = false, maximum = mMin(mRandom()+0.5, 1), }
+		tmult[terrainGrass] = mRandom(1,20)
+		tmult[terrainPlains] = mRandom(1,20)
+		tmult[terrainDesert] = mRandom(1,20)
+		tmult[terrainTundra] = mRandom(1,20)
+		tmult[terrainSnow] = mRandom(1,20)
 	end
 
 	if useLatitude == true then
-		fness[FeatureTypes.FEATURE_FOREST] = math.min(fness[FeatureTypes.FEATURE_FOREST] * 1.4, 1.0)
-		fness[FeatureTypes.FEATURE_JUNGLE] = math.min(fness[FeatureTypes.FEATURE_JUNGLE] * 1.4, 1.0)
+		fness[FeatureTypes.FEATURE_FOREST] = mMin(fness[FeatureTypes.FEATURE_FOREST] * 1.4, 1.0)
+		fness[FeatureTypes.FEATURE_JUNGLE] = mMin(fness[FeatureTypes.FEATURE_JUNGLE] * 1.4, 1.0)
 		if tmult[terrainGrass] == 0 then tmult[terrainGrass] = 1 end
 		if tmult[terrainPlains] == 0 then tmult[terrainPlains] = 1 end
 		if tmult[terrainDesert] == 0 then tmult[terrainDesert] = 1 end
@@ -899,10 +916,10 @@ end
 
 
 local function generateRegionType(latitude)
-	local largeBrushChance = math.random(1,10)
-	local rotationType = math.random(0,1)
-	local rotationChance = math.random(1, 4)
-	local paintedRatio = (math.random() * 0.7) + 0.1
+	local largeBrushChance = mRandom(1,10)
+	local rotationType = mRandom(0,1)
+	local rotationChance = mRandom(1, 4)
+	local paintedRatio = (mRandom() * 0.7) + 0.1
 --	print(largeBrushChance, rotationType, rotationChance, paintedRatio)
 	local region = {
 		tileList = {},
@@ -926,7 +943,7 @@ local function generateRegionType(latitude)
 			end
 		end
 		if #terrainsHere > 0 then
-			local ti = math.random(1,#terrainsHere)
+			local ti = mRandom(1,#terrainsHere)
 			terrainType = terrainsHere[ti]
 --			print(terrainType)
 		else
@@ -938,7 +955,7 @@ local function generateRegionType(latitude)
 				if latitude >= tudes.mini and latitude <= tudes.maxi then
 					local minidist = latitude - tudes.mini
 					local maxidist = tudes.maxi - latitude
-					local dist = math.min(minidist, maxidist)
+					local dist = mMin(minidist, maxidist)
 --					print(tt, tudes.mini, tudes.maxi, minidist, maxidist, dist)
 					if dist > maxdist then
 						maxdist = dist
@@ -949,27 +966,26 @@ local function generateRegionType(latitude)
 			if maxtt ~= nil then terrainType = maxtt end
 		end
 	else
-		local ti = math.random(1,#terrains)
+		local ti = mRandom(1,#terrains)
 		terrainType = terrains[ti]
 	end
 	local tileTypeList = terrainList[terrainType]
-	local ally = terrainAlly[terrainType]
-	local allyTileTypeList = terrainList[ally]
+	local alliesRoll = terrainAlliesRoll[terrainType]
 --	print (terrainType, #tileTypeList)
 	for p = 0, 1 do
 		local i = 1
 		local iterations = 0
-		local length = math.random(20, 40)
+		local length = mRandom(20, 40)
 --		print("maxmountain, maxhills", maxmountain, maxhills)
 		local totalmountain = 0
 		local totalhills = 0
 		local lengthleft = length
 		local thisness = {}
-		local thismountainness = math.random() * mountainness
+		local thismountainness = mRandom() * mountainness
 		local thishillsness = diceRoll(3, true, hillsness)
-		local thisallyness = math.random() * allyness
-		local maxmountain = math.floor(thismountainness * length)
-		local maxhills = math.floor(thishillsness * length)
+		local thisallyness = mRandom() * allyness
+		local maxmountain = mFloor(thismountainness * length)
+		local maxhills = mFloor(thishillsness * length)
 		local tlist = {}
 		local totalf = {}
 		local maxf = {}
@@ -977,12 +993,13 @@ local function generateRegionType(latitude)
 		local featuresallocated = 0
 		repeat
 			local ttl
-			if math.random() < thisallyness and ally ~= nil then
-				ttl = allyTileTypeList
+			if mRandom() < thisallyness and allies ~= nil then
+				local ally = alliesRoll[mRandom(1, #alliesRoll)]
+				ttl = terrainList[ally]
 			else
 				ttl = tileTypeList
 			end
-			local tti = math.random(1, #ttl)
+			local tti = mRandom(1, #ttl)
 			local tileName = ttl[tti]
 			local tile = tileDictionary[tileName]
 	--		print(tti, tileName)
@@ -1007,9 +1024,9 @@ local function generateRegionType(latitude)
 						canBeHere = false
 					end
 				end
-				if math.random() < fness[tile.feature] and canBeHere == true then
+				if mRandom() < fness[tile.feature] and canBeHere == true then
 					if fcurve[tile.feature] == nil then
-						thisness[tile.feature] = math.random()
+						thisness[tile.feature] = mRandom()
 					else
 						thisness[tile.feature] = diceRoll(fcurve[tile.feature].dice, fcurve[tile.feature].invert, fcurve[tile.feature].maximum)
 --						print(tile.feature, fcurve[tile.feature].dice, fcurve[tile.feature].invert, fcurve[tile.feature].maximum, thisness[tile.feature])
@@ -1018,13 +1035,13 @@ local function generateRegionType(latitude)
 					thisness[tile.feature] = 0
 				end
 			end
-			if maxf[tile.feature] == nil and math.floor(thisness[tile.feature]*100) > 0 and allocated < length then
-				maxf[tile.feature] = math.floor(thisness[tile.feature] * length)
+			if maxf[tile.feature] == nil and mFloor(thisness[tile.feature]*100) > 0 and allocated < length then
+				maxf[tile.feature] = mFloor(thisness[tile.feature] * length)
 				if maxf[tile.feature] > lengthleft then maxf[tile.feature] = lengthleft end
 				lengthleft = lengthleft - maxf[tile.feature]
 				allocated = allocated + maxf[tile.feature]
 				featuresallocated = featuresallocated + 1
---				print("f:", tile.feature, "percent:", math.floor(thisness[tile.feature] * 100), "maxf:", maxf[tile.feature], "left:", lengthleft, "out of:", length)
+--				print("f:", tile.feature, "percent:", mFloor(thisness[tile.feature] * 100), "maxf:", maxf[tile.feature], "left:", lengthleft, "out of:", length)
 				totalf[tile.feature] = 0
 			elseif maxf[tile.feature] == nil then
 				totalf[tile.feature] = 0
@@ -1047,7 +1064,7 @@ local function generateRegionType(latitude)
 --		print("done with", i, length, iterations)
 		if p == 0 then
 			region.tileList = tlist
-			if math.random() > differenciatePaint then
+			if mRandom() > differenciatePaint then
 				region.paintTileList = tlist
 				break
 			end
@@ -1097,7 +1114,17 @@ local function prepareTerrainTileLists()
 
 	-- calculating the percentage of the land that should be a certain terrain type (used as a maximum)
 	for terrainType, mult in pairs(tmult) do
-		terrainMaxArea[terrainType] = math.floor( (mult / #terrains) * continentalTotalTiles )
+		terrainMaxArea[terrainType] = mFloor( (mult / #terrains) * continentalTotalTiles )
+	end
+
+	-- creating lists of possible ally terrains, weighted by tmult
+	for terrainType, allies in pairs(terrainAllies) do
+		terrainAlliesRoll[terrainType] = {}
+		for i, allyTerrainType in pairs(allies) do
+			for n = 1, tmult[allyTerrainType] do
+				table.insert(terrainAlliesRoll[terrainType], allyTerrainType)
+			end
+		end
 	end
 
 	return terrainList, terrains, terrainMaxArea
@@ -1106,7 +1133,7 @@ end
 
 local function getXY(index)
 	index = index - 1
-	return index % iW, math.floor(index / iW) -- lua can return two variables
+	return index % iW, mFloor(index / iW) -- lua can return two variables
 end
 
 local function getIndex(x, y)
@@ -1187,11 +1214,11 @@ end
 local function cardinalToHex(northEastSouthWest)
 	local direction
 	if northEastSouthWest == 1 then
-		direction = 2 + math.random(0,1)
+		direction = 2 + mRandom(0,1)
 	elseif northEastSouthWest == 2 then
 		direction = 4
 	elseif northEastSouthWest == 3 then
-		direction = 5 + math.random(0,1)
+		direction = 5 + mRandom(0,1)
 	elseif northEastSouthWest == 4 then
 		direction = 1
 	end
@@ -1199,7 +1226,7 @@ local function cardinalToHex(northEastSouthWest)
 end
 
 local function randomCardinalDirection()
-	local northEastSouthWest = math.random(1,4)
+	local northEastSouthWest = mRandom(1,4)
 	return cardinalToHex(northEastSouthWest)
 end
 
@@ -1220,7 +1247,7 @@ end
 
 local function emptyQuadTile()
 	local q
-	local qmax = math.max(#soQuad[1],#soQuad[2],#soQuad[3],#soQuad[4])
+	local qmax = mMax(#soQuad[1],#soQuad[2],#soQuad[3],#soQuad[4])
 	if qmax == #soQuad[1] then
 		q = 1
 	elseif qmax == #soQuad[2] then
@@ -1233,7 +1260,7 @@ local function emptyQuadTile()
 
 	local i
 	if #soQuad[q] > 1 then
-		i = math.random(1, #soQuad[q])
+		i = mRandom(1, #soQuad[q])
 	else
 		return nil
 	end
@@ -1242,8 +1269,8 @@ end
 
 
 local function fillQuadrants()
-	local halfx = math.floor(xMax / 2)
-	local halfy = math.floor(yMax / 2)
+	local halfx = mFloor(xMax / 2)
+	local halfy = mFloor(yMax / 2)
 	for q = 1, 4 do
 		local xa = 1
 		if q == 2 or q == 4 then xa = halfx + 1 end
@@ -1278,7 +1305,7 @@ local function getCenter(tiles)
 		sumy = sumy + y
 		tilecount = tilecount + 1
 	end
-	return math.floor(sumx / tilecount), math.floor(sumy / tilecount)
+	return mFloor(sumx / tilecount), mFloor(sumy / tilecount)
 end
 
 
@@ -1307,7 +1334,7 @@ local function getEighth(cx, cy, x, y)
 				return 2
 			end
 		else
-			if math.abs(diffx) <= diffy then
+			if mAbs(diffx) <= diffy then
 				return 3
 			else
 				return 4
@@ -1315,7 +1342,7 @@ local function getEighth(cx, cy, x, y)
 		end
 	else
 		if diffx >= 0 then
-			if diffx <= math.abs(diffy) then
+			if diffx <= mAbs(diffy) then
 				return 5
 			else
 				return 6
@@ -1365,13 +1392,13 @@ local function paintContinent(x, y, continentIndex, continentSize, isolateContin
 	local continentConnected
 	repeat
 		local dLimit = 0
-		if math.random(1,continentLargeBrushChance) == 1 then dLimit = 6 end
+		if mRandom(1,continentLargeBrushChance) == 1 then dLimit = 6 end
 		for d = 0, dLimit do
 			local nx, ny = directionalTransform(d, x, y)
 			local index = getIndex(nx, ny)
 			local neighbortest, nearcoast, friendlyNeighbors = canExpandContinentHere(index, continentIndex, isolateContinent)
 			if ismuthChance > 0 then
-				if math.random() < ismuthChance then neighbortest = true end
+				if mRandom() < ismuthChance then neighbortest = true end
 			end
 			if continentalTiles[index] == nil and ny > southPole and ny < northPole and neighbortest == true then
 --				if continentIndex == 1 then print("new tile!") end
@@ -1388,9 +1415,9 @@ local function paintContinent(x, y, continentIndex, continentSize, isolateContin
 		end
 
 		if y >= yMax - 4 and evadePoles == true then
-			direction = 5 + math.random(0,1)
+			direction = 5 + mRandom(0,1)
 		elseif y <= 3 and evadePoles == true then
-			direction = 2 + math.random(0,1)
+			direction = 2 + mRandom(0,1)
 		else
 			direction = randomCardinalDirection()
 		end
@@ -1445,7 +1472,7 @@ local function expandContinent(tiles, id, maxArea, maxIterations, isolateContine
 
 	local directedness = { 0, 0, 0, 0, 0, 0 }
 	for n = 1, directednessTotal do
-		local cd = math.random(1,4)
+		local cd = mRandom(1,4)
 		local d = cardinalToHex(cd)
 		directedness[d] = directedness[d] + 1
 	end
@@ -1453,7 +1480,7 @@ local function expandContinent(tiles, id, maxArea, maxIterations, isolateContine
 
 	local eighthFavoring = { 0, 0, 0, 0, 0, 0, 0, 0 }
 	for n = 1, eighthFavoringTotal do
-		local e = math.random(1,8)
+		local e = mRandom(1,8)
 		eighthFavoring[e] = eighthFavoring[e] + 1
 	end
 	local centerx, centery = getCenter(tiles)
@@ -1463,7 +1490,7 @@ local function expandContinent(tiles, id, maxArea, maxIterations, isolateContine
 		local bufferIndex
 --			print(#tileBuffer)
 		if #tileBuffer > 1 then
-			bufferIndex = math.random(1,#tileBuffer)
+			bufferIndex = mRandom(1,#tileBuffer)
 		elseif bufferIndex == 1 then
 			bufferIndex = 1
 		else
@@ -1478,7 +1505,7 @@ local function expandContinent(tiles, id, maxArea, maxIterations, isolateContine
 			local index = getIndex(nx, ny)
 			local neighbortest, nearcoast, friendlyNeighbors = canExpandContinentHere(index, continentIndex, isolateContinent)
 			if ismuthChance > 0 then
-				if math.random() < ismuthChance then neighbortest = true end
+				if mRandom() < ismuthChance then neighbortest = true end
 			end
 			if continentalTiles[index] == nil and ny > southPole and ny < northPole and neighbortest == true then
 				continentalTiles[index] = continentIndex
@@ -1537,7 +1564,7 @@ end
 local function planContinentSizes()
 -- create idealized list of continent sizes
 -- growContinents() picks from this list at random
-	local islandArea = math.ceil( islandRatio * landArea )
+	local islandArea = mCeil( islandRatio * landArea )
 	local theory = {}
 	local left = landArea
 	local cleft = landArea - islandArea
@@ -1546,11 +1573,11 @@ local function planContinentSizes()
 	repeat
 		local size = 0
 		if left <= islandArea then
-			local maximum = math.min(islandSizeMax, left)
-			size = math.random(1, maximum)
+			local maximum = mMin(islandSizeMax, left)
+			size = mRandom(1, maximum)
 		else
-			local c = math.ceil( math.random(cSizeMin, cSizeMax) )
-			size = math.min(c, cleft)
+			local c = mCeil( mRandom(cSizeMin, cSizeMax) )
+			size = mMin(c, cleft)
 		end
 		theory[i] = size
 		left = left - size
@@ -1592,7 +1619,7 @@ local function growContinents()
 		print("land area left to fill", left)
 		local continentSize = left
 		if #cSizeTheory > 0 then
-			local csti = math.random(1,#cSizeTheory)
+			local csti = mRandom(1,#cSizeTheory)
 			continentSize = cSizeTheory[csti]
 		else
 			print("end of continent size plans")
@@ -1602,7 +1629,7 @@ local function growContinents()
 		local connectedChance = noBlockingChance
 --		print("chance not to generate blocking", noBlockingChance)
 
-		local paintedSize = math.ceil(continentSize * paintedRatio)
+		local paintedSize = mCeil(continentSize * paintedRatio)
 		if paintedSize == 0 then paintedSize = 1 end
 		local expandedSize = continentSize - paintedSize
 --		print("land area remaining", landArea - continentalTotalTiles)
@@ -1611,14 +1638,14 @@ local function growContinents()
 
 		local tileIndex
 
-		if math.random() < connectedChance then
+		if mRandom() < connectedChance then
 			isolateContinent = false
 		else
 			isolateContinent = true
 		end
 
 		if continentIndex == 1 or isolateContinent == false then
-			local oi = math.random(1, #stillOcean)
+			local oi = mRandom(1, #stillOcean)
 			tileIndex = stillOcean[oi]
 		else
 			tileIndex = emptyQuadTile()
@@ -1630,8 +1657,8 @@ local function growContinents()
 			break
 		else
 			if pangaea == true and (continentSize > islandSizeMax or #cSizeTheory == 0) then
-				x = math.floor(xMax / 2)
-				y = math.floor(yMax / 2)
+				x = mFloor(xMax / 2)
+				y = mFloor(yMax / 2)
 			end
 		end
 
@@ -1674,11 +1701,11 @@ local function growContinents()
 		end
 
 		local blockedAreaLimit
-		if blockedTileCount < oceanArea and math.random() < noBlockingChance then
+		if blockedTileCount < oceanArea and mRandom() < noBlockingChance then
 			blockedAreaLimit = 0
 		else
 			blockedAreaLimit = (continentalTotalTiles / landArea) * (oceanArea - blockedTileCount)
-			blockedAreaLimit = math.floor(blockedAreaLimit)
+			blockedAreaLimit = mFloor(blockedAreaLimit)
 		end
 
 		for i, index in pairs(stillOcean) do
@@ -1715,7 +1742,7 @@ local function growContinents()
 			local coastLevelLimit = iH
 --			print(coastLevelLimit, blockedAreaLimit, continentalTotalTiles, blockedTileCount, #addCoast, oceanArea, landArea)
 			repeat
-				local i = math.random(1, #coastBuffer)
+				local i = mRandom(1, #coastBuffer)
 				local index = coastBuffer[i]
 				if coastLevel[index] > maxCoastLevel then
 					maxCoastLevel = coastLevel[index]
@@ -1743,7 +1770,7 @@ local function growContinents()
 			if #addCoast > 0 then
 --				print("ocean!")
 				repeat
-					local i = math.random(1, #addCoast)
+					local i = mRandom(1, #addCoast)
 					local index = addCoast[i]
 					isCoast[index] = continentIndex
 					blockedTileCount = blockedTileCount + 1
@@ -1805,9 +1832,9 @@ local function tileLatitudeChecks(index, tileName)
 	local latitude
 	if plot ~= nil then latitude = plot:GetLatitude() end
 	if latitude ~= nil then
-		local tolerance = math.random(-1,1)
+		local tolerance = mRandom(-1,1)
 		tolerance = tolerance * latitudeTolerance
-		latitude = math.min(math.max(latitude - tolerance, 0), 90)
+		latitude = mMin(mMax(latitude - tolerance, 0), 90)
 --		local x, y = getXY(index)
 --		if x == 1 then print (x, y, latitude, tt, terrainLatitudes[tt].maxi, terrainLatitudes[tt].mini, ft, featureLatitudes[ft].maxi, featureLatitudes[ft].mini) end
 		if latitude > terrainLatitudes[tt].maxi or latitude < terrainLatitudes[tt].mini or latitude > featureLatitudes[ft].maxi or latitude < featureLatitudes[ft].mini then
@@ -1822,20 +1849,20 @@ local function paintRegion(x, y, regionIndex, regionName, regionSize)
 	local region = regionDictionary[regionName]
 	local newTiles = {}
 	local filledRegionTiles = 0
-	local direction = math.random(1,6)
+	local direction = mRandom(1,6)
 	local tileIterations = 0
 	repeat
 		local badDirections = {}
 		local badDirectionTotal = 0
 		local dLimit = 0
 		local centerIndex = getIndex(x, y)
-		if math.random(1,region.largeBrushChance) == 1 then dLimit = 6 end
+		if mRandom(1,region.largeBrushChance) == 1 then dLimit = 6 end
 		local stopRegion = false
 		for d = 0, 6 do
 			local nx, ny = directionalTransform(d, x, y)
 			local index = getIndex(nx, ny)
 			if tileTiles[index] == nil and continentalTiles[index] ~= nil and d <= dLimit then
-				local tileNumber = math.random(1, #region.paintTileList)
+				local tileNumber = mRandom(1, #region.paintTileList)
 				local tileName = region.paintTileList[tileNumber]
 				local draw = true
 				if useLatitude == true then
@@ -1876,13 +1903,13 @@ local function paintRegion(x, y, regionIndex, regionName, regionSize)
 			break
 		end
 
-		if math.random(1,region.rotationChance) == 1 or (badDirections[direction] == true and keepItInside) then
+		if mRandom(1,region.rotationChance) == 1 or (badDirections[direction] == true and keepItInside) then
 			local dfi = 0
 			repeat
 				if region.rotationType == 0 then
 					direction = randomCardinalDirection()
 				elseif region.rotationType == 1 then
-					direction = direction + math.random(0,2) - 1
+					direction = direction + mRandom(0,2) - 1
 					if direction > 6 then
 						direction = 1
 					elseif direction < 1 then
@@ -1917,7 +1944,7 @@ local function expandRegion(tiles, regionIndex, regionName, maxArea, maxIteratio
 			local bufferIndex
 --			print(#tileBuffer)
 			if #tileBuffer > 1 then
-				bufferIndex = math.random(1,#tileBuffer)
+				bufferIndex = mRandom(1,#tileBuffer)
 			elseif bufferIndex == 1 then
 				bufferIndex = 1
 			else
@@ -1930,8 +1957,8 @@ local function expandRegion(tiles, regionIndex, regionName, maxArea, maxIteratio
 				local nx, ny = directionalTransform(d, tx, ty)
 				local index = ny * iW + nx + 1
 				if tileTiles[index] == nil and continentalTiles[index] ~= nil and ny > southPole and ny < northPole then
-					if math.random() > regionNoExpandRatio then
-						local tileNumber = math.random(1, #region.tileList)
+					if mRandom() > regionNoExpandRatio then
+						local tileNumber = mRandom(1, #region.tileList)
 						local tileName = region.tileList[tileNumber]
 						-- latitude checks
 						local draw = true
@@ -1976,17 +2003,17 @@ local function growRegions()
 
 	-- restrict region size to biggest continent
 	print("biggest continent size", biggestContinentSize)
-	local halfBiggestContinentSize = math.ceil(biggestContinentSize / 2)
+	local halfBiggestContinentSize = mCeil(biggestContinentSize / 2)
 	if regionMaxSize > biggestContinentSize then
 		print ("region maximum size", regionMaxSize, "reduced to", biggestContinentSize)
-		regionMaxSize = math.max(biggestContinentSize, smallestRegionSize * 2)
+		regionMaxSize = mMax(biggestContinentSize, smallestRegionSize * 2)
 	end
 	if regionMinSize > halfBiggestContinentSize then
 		print ("region minimum size", regionMinSize, "reduced to", halfBiggestContinentSize)
-		regionMinSize = math.max(halfBiggestContinentSize, smallestRegionSize)
+		regionMinSize = mMax(halfBiggestContinentSize, smallestRegionSize)
 	end
 	regionAvgSize = (regionMinSize + regionMaxSize) / 2
-	maxRegions = math.floor( (4 * landArea) / regionAvgSize )
+	maxRegions = mFloor( (4 * landArea) / regionAvgSize )
 	print("maximum regions", maxRegions)
 
 	-- gather available tiles to fill with regions
@@ -2006,7 +2033,7 @@ local function growRegions()
 	local lastFilledtiles = 0
 	repeat
 		regionIterations = regionIterations + 1
-		local avi = math.random(1, #availableIndices)
+		local avi = mRandom(1, #availableIndices)
 		local index = availableIndices[avi]
 		local x, y = getXY(index)
 		local regionName, region
@@ -2023,8 +2050,8 @@ local function growRegions()
 		table.insert(regionList, regionName)
 		table.insert(regionDictionary, region)
 		totalRegions = #regionDictionary
-		local regionSize = math.random(regionMinSize, regionMaxSize)
-		local regionPaintedSize = math.floor(regionSize * region.paintedRatio)
+		local regionSize = mRandom(regionMinSize, regionMaxSize)
+		local regionPaintedSize = mFloor(regionSize * region.paintedRatio)
 		local regionExpandedSize = regionSize - regionPaintedSize
 		local tiles = paintRegion(x, y, regionIterations, regionName, regionPaintedSize)
 		print(#tiles, "tiles painted")
@@ -2091,11 +2118,11 @@ local function fillRegionGaps()
 			end
 			if #neighbors > 0 then
 				local ni = 1
-				if #neighbors > 1 then ni = math.random(1, #neighbors) end
+				if #neighbors > 1 then ni = mRandom(1, #neighbors) end
 				local nindex = neighbors[ni]
 				local regionName = regionNames[nindex]
 				local region = regionDictionary[regionName]
-				local tileNumber = math.random(1, #region.tileList)
+				local tileNumber = mRandom(1, #region.tileList)
 				local tileName = region.tileList[tileNumber]
 				tileTiles[index] = tileName
 				regionNames[index] = regionName
@@ -2143,7 +2170,7 @@ local function fillTinyRegions()
 				for i, index in pairs(tiles) do
 					regionNames[index] = highestname
 					local region = regionDictionary[highestname]
-					local tileNumber = math.random(1, #region.tileList)
+					local tileNumber = mRandom(1, #region.tileList)
 					local tileName = region.tileList[tileNumber]
 					tileTiles[index] = tileName
 					regionalTiles[index] = { regionIndex = highestri, painted = false }
@@ -2167,7 +2194,7 @@ local function mountainLineCheck(x, y)
 			if dplot:GetPlotType() == PlotTypes.PLOT_MOUNTAIN then
 				local mountainDistance = di - lastMountain
 				if mountainDistance == 1 then
-					if math.random() > mountainThickness then
+					if mRandom() > mountainThickness then
 						goodD = false
 						break
 					end
@@ -2198,7 +2225,7 @@ local function findRangeTiles()
 		if plot ~= nil then
 			if plot:GetPlotType() == PlotTypes.PLOT_MOUNTAIN then
 				if levelMountains > 0 then
-					if math.random() < levelMountains then
+					if mRandom() < levelMountains then
 						plot:SetPlotType(PlotTypes.PLOT_HILLS)
 					else
 						mountainCount = mountainCount + 1
@@ -2257,7 +2284,7 @@ end
 
 -- collect tiles to be potentially mountainous from coast range and region range
 local function collectRange(range, totalArea, perscribedArea)
-	perscribedArea = perscribedArea + math.ceil((rangeHillRatio+0.05) * perscribedArea) -- to account for some collected tiles becoming hills
+	perscribedArea = perscribedArea + mCeil((rangeHillRatio+0.05) * perscribedArea) -- to account for some collected tiles becoming hills
 	local areaDifference = totalArea - perscribedArea
 	local area = 0
 	if areaDifference <= 0 then 
@@ -2281,7 +2308,7 @@ local function collectRange(range, totalArea, perscribedArea)
 	local tilesCollected = 0
 	local collection = {}
 	repeat
-		local bufferIndex = math.random(1, #rangeBuffer)
+		local bufferIndex = mRandom(1, #rangeBuffer)
 		local rangeIndex = rangeBuffer[bufferIndex]
 		local localRange = range[rangeIndex]
 		local begin = 1
@@ -2323,10 +2350,10 @@ local function raiseRange(collection, area)
 	local tilesRaised = 0
 	local mountainTiles = {}
 	repeat
-		local index = table.remove(buffer, math.random(1, #buffer))
+		local index = table.remove(buffer, mRandom(1, #buffer))
 		local plot = Map.GetPlotByIndex(index - 1)
 		if plot ~= nil then
-			if math.random() < rangeHillRatio then
+			if mRandom() < rangeHillRatio then
 				plot:SetPlotType(PlotTypes.PLOT_HILLS, false, false)
 				--tilesRaised = tilesRaised + 0.5
 			else
@@ -2346,12 +2373,12 @@ local function expandMountains(tilesRaised, area, mountainTiles)
 		local mountainBuffer = mountainTiles
 		local noChange = 0
 		repeat
-			local bufferIndex = math.random(1,#mountainBuffer)
+			local bufferIndex = mRandom(1,#mountainBuffer)
 			local index = mountainBuffer[bufferIndex]
 			local x, y = getXY(index)
 			local dirs = { 1, 2, 3, 4, 5, 6 }
 			repeat
-				local di = math.random(1,#dirs)
+				local di = mRandom(1,#dirs)
 				local d = dirs[di]
 				local dx, dy = directionalTransform(d, x, y)
 				local dindex = getIndex(dx, dy)
@@ -2360,7 +2387,7 @@ local function expandMountains(tilesRaised, area, mountainTiles)
 				--print(isCoastRange[index], isCoastRange[dindex], awayFromCoast)
 				if continentalTiles[dindex] ~= nil and awayFromCoast then
 					local plot = Map.GetPlotByIndex(dindex - 1)
-					if math.random() < rangeHillRatio and plot:GetPlotType() ~= PlotTypes.PLOT_HILLS and plot:GetPlotType() ~= PlotTypes.PLOT_MOUNTAIN then
+					if mRandom() < rangeHillRatio and plot:GetPlotType() ~= PlotTypes.PLOT_HILLS and plot:GetPlotType() ~= PlotTypes.PLOT_MOUNTAIN then
 						plot:SetPlotType(PlotTypes.PLOT_HILLS, false, false)
 						table.insert(mountainBuffer, dindex)
 						noChange = 0
@@ -2418,7 +2445,7 @@ local function popCoasts()
 	local oBuffer = stillOcean
 	local isNotFlat = {}
 	repeat
-		local i = math.random(1, #oBuffer)
+		local i = mRandom(1, #oBuffer)
 		local index = oBuffer[i]
 		local plot = Map.GetPlotByIndex(index - 1)
 		local thisIceChance = iceChance
@@ -2499,14 +2526,14 @@ local function popCoasts()
 					end
 				end
 				if y == 0 or y == yMax - 1 then blockedCount = blockedCount + 2 end
-				if blockedCount == 0 and math.random() < coastRecedeChance then
+				if blockedCount == 0 and mRandom() < coastRecedeChance then
 					plot:SetTerrainType(6)
 				elseif (ice == true and betweencontinents == false and blockedCount < 3 and (bdistance == 1 or bdistance == 0 or bdistance == 5)) or (hascoast == false and hasland == false) then
 					local isOcean = false
 					if nearOceanIce[index] == true then
 						isOcean = true
 					end
-					if math.random() < thisIceChance then
+					if mRandom() < thisIceChance then
 						popIce(index, isOcean)
 						if isOcean == true then
 							for d = 1, 6 do
@@ -2522,9 +2549,9 @@ local function popCoasts()
 						end
 					end
 				elseif atoll == true and #oceanTiles > 3 then
-					if math.random() < atollChance then
+					if mRandom() < atollChance then
 						--print("atoll possible")
-						local a = math.random(2, #oceanTiles-1)
+						local a = mRandom(2, #oceanTiles-1)
 						local aplot = Map.GetPlotByIndex(oceanTiles[a] - 1)
 						plot:SetTerrainType(5)
 						plot:SetFeatureType(featureAtoll)
@@ -2533,7 +2560,7 @@ local function popCoasts()
 					for nothing, index in pairs(deepTiles) do
 						local dplot = Map.GetPlotByIndex(index - 1)
 --						print("coast can expand")
-						if dplot ~= nil and math.random() < coastExpandChance then
+						if dplot ~= nil and mRandom() < coastExpandChance then
 --							print("coast expanded!")
 							dplot:SetTerrainType(5)
 						end
@@ -2563,13 +2590,13 @@ function GeneratePlotTypes()
 	southPole = 0
 	northPole = yMax - 1
 	mapArea = (iW) * (iH)
-	landArea = math.floor( mapArea * landRatio )
+	landArea = mFloor( mapArea * landRatio )
 
 	setAfterOptions()
 
-	regionAvgSize = math.floor( (regionMinSize + regionMaxSize) / 2 )
+	regionAvgSize = mFloor( (regionMinSize + regionMaxSize) / 2 )
 
-	maxRegions = math.floor( (4 * landArea) / regionAvgSize )
+	maxRegions = mFloor( (4 * landArea) / regionAvgSize )
 	print(iW, "by", iH)
 	print("land area", landArea)
 	print("maximum regions", maxRegions)
@@ -2619,9 +2646,9 @@ function GeneratePlotTypes()
 	if mountainCount >= continentalTotalTiles then
 		print("all mountain area taken by regions")
 	else
-		local totalMountainArea = math.floor(continentalTotalTiles * mountainRatio)
+		local totalMountainArea = mFloor(continentalTotalTiles * mountainRatio)
 		local mountainAreaLeft = totalMountainArea - mountainCount
-		local coastRangeArea = math.floor(mountainAreaLeft * coastRangeRatio)
+		local coastRangeArea = mFloor(mountainAreaLeft * coastRangeRatio)
 		local regionRangeArea = mountainAreaLeft - coastRangeArea
 		print("inter-region range:")
 		local rTilesRaised = doRange(regionRange, regionRangeTileCount, regionRangeArea)
@@ -2736,7 +2763,7 @@ function AddFeatures()
 					end
 				end
 			elseif plot:GetLatitude() > featureLatitudes[FeatureTypes.FEATURE_ICE].mini then
-				if plot:GetTerrainType() == 6 and plot:CanHaveFeature(FeatureTypes.FEATURE_ICE) and math.random() < iceChance * (plot:GetLatitude() / 270) then
+				if plot:GetTerrainType() == 6 and plot:CanHaveFeature(FeatureTypes.FEATURE_ICE) and mRandom() < iceChance * (plot:GetLatitude() / 270) then
 					local iceHere = true
 					local nearice = {}
 					for d = 1, 6 do
@@ -2755,7 +2782,7 @@ function AddFeatures()
 					if iceHere == true then
 						popIce(index, true)
 						for nothing, dindex in pairs(nearice) do
-							if  math.random() < iceChance / 12 then nearOceanIce[dindex] = true end
+							if  mRandom() < iceChance / 12 then nearOceanIce[dindex] = true end
 						end
 					end
 				end
