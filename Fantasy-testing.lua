@@ -255,8 +255,18 @@ local nearOceanIce = {}
 local terrainMaxArea = {}
 local terrainFilledTiles = {}
 local biggestContinentSize = 0
+
 ----
 
+local terrainGrass = GameInfoTypes["TERRAIN_GRASS"]
+local terrainPlains = GameInfoTypes["TERRAIN_PLAINS"]
+local terrainDesert = GameInfoTypes["TERRAIN_DESERT"]
+local terrainTundra = GameInfoTypes["TERRAIN_TUNDRA"]
+local terrainSnow = GameInfoTypes["TERRAIN_SNOW"]
+local terrainCoast = GameInfoTypes["TERRAIN_COAST"]
+local terrainOcean = GameInfoTypes["TERRAIN_OCEAN"]
+
+----
 
 local function diceRoll(dice, invert, maximum)
 	if invert == nil then invert = false end
@@ -502,139 +512,139 @@ local function setTileDictionary()
 tileDictionary = {
 		["Plains"] = {
 			plotType = PlotTypes.PLOT_LAND,
-			terrainType = GameInfoTypes["TERRAIN_PLAINS"],
+			terrainType = terrainPlains,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["Grass"] = {
 			plotType = PlotTypes.PLOT_LAND,
-			terrainType = GameInfoTypes["TERRAIN_GRASS"],
+			terrainType = terrainGrass,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["Desert"] = {
 			plotType = PlotTypes.PLOT_LAND,
-			terrainType = GameInfoTypes["TERRAIN_DESERT"],
+			terrainType = terrainDesert,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["HillsDesert"] = {
 			plotType = PlotTypes.PLOT_HILLS,
-			terrainType = GameInfoTypes["TERRAIN_DESERT"],
+			terrainType = terrainDesert,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["MountainDesert"] = {
 			plotType = PlotTypes.PLOT_MOUNTAIN,
-			terrainType = GameInfoTypes["TERRAIN_DESERT"],
+			terrainType = terrainDesert,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["DesertOasis"] = {
 			plotType = PlotTypes.PLOT_LAND,
-			terrainType = GameInfoTypes["TERRAIN_DESERT"],
+			terrainType = terrainDesert,
 			feature = FeatureTypes.FEATURE_OASIS,
 		},
 		["PlainsForest"] = {
 			plotType = PlotTypes.PLOT_LAND,
-			terrainType = GameInfoTypes["TERRAIN_PLAINS"],
+			terrainType = terrainPlains,
 			feature = FeatureTypes.FEATURE_FOREST,
 		},
 		["HillsPlains"] = {
 			plotType = PlotTypes.PLOT_HILLS,
-			terrainType = GameInfoTypes["TERRAIN_PLAINS"],
+			terrainType = terrainPlains,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["HillsGrass"] = {
 			plotType = PlotTypes.PLOT_HILLS,
-			terrainType = GameInfoTypes["TERRAIN_Grass"],
+			terrainType = terrainGrass,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["GrassMarsh"] = {
 			plotType = PlotTypes.PLOT_LAND,
-			terrainType = GameInfoTypes["TERRAIN_GRASS"],
+			terrainType = terrainGrass,
 			feature = FeatureTypes.FEATURE_MARSH,
 		},
 		["GrassForest"] = {
 			plotType = PlotTypes.PLOT_LAND,
-			terrainType = GameInfoTypes["TERRAIN_GRASS"],
+			terrainType = terrainGrass,
 			feature = FeatureTypes.FEATURE_FOREST,
 		},
 		["PlainsJungle"] = {
 			plotType = PlotTypes.PLOT_LAND,
-			terrainType = GameInfoTypes["TERRAIN_PLAINS"],
+			terrainType = terrainPlains,
 			feature = FeatureTypes.FEATURE_JUNGLE,
-			terrainMasquerade = GameInfoTypes["TERRAIN_GRASS"],
+			terrainMasquerade = terrainGrass,
 		},
 		["HillsPlainsJungle"] = {
 			plotType = PlotTypes.PLOT_HILLS,
-			terrainType = GameInfoTypes["TERRAIN_PLAINS"],
+			terrainType = terrainPlains,
 			feature = FeatureTypes.FEATURE_JUNGLE,
-			terrainMasquerade = GameInfoTypes["TERRAIN_GRASS"],
+			terrainMasquerade = terrainGrass,
 		},
 		["HillsGrassForest"] = {
 			plotType = PlotTypes.PLOT_HILLS,
-			terrainType = GameInfoTypes["TERRAIN_GRASS"],
+			terrainType = terrainGrass,
 			feature = FeatureTypes.FEATURE_FOREST,
 		},
 		["HillsPlainsForest"] = {
 			plotType = PlotTypes.PLOT_HILLS,
-			terrainType = GameInfoTypes["TERRAIN_PLAINS"],
+			terrainType = terrainPlains,
 			feature = FeatureTypes.FEATURE_FOREST,
 		},
 		["OceanIce"] = {
 			plotType = PlotTypes.PLOT_OCEAN,
-			terrainType = GameInfoTypes["TERRAIN_COAST"],
+			terrainType = terrainCoast,
 			feature = FeatureTypes.FEATURE_ICE,
 		},
 		["MountainGrass"] = {
 			plotType = PlotTypes.PLOT_MOUNTAIN,
-			terrainType = GameInfoTypes["TERRAIN_GRASS"],
+			terrainType = terrainGrass,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["MountainPlains"] = {
 			plotType = PlotTypes.PLOT_MOUNTAIN,
-			terrainType = GameInfoTypes["TERRAIN_PLAINS"],
+			terrainType = terrainPlains,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["MountainDesert"] = {
 			plotType = PlotTypes.PLOT_MOUNTAIN,
-			terrainType = GameInfoTypes["TERRAIN_DESERT"],
+			terrainType = terrainDesert,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["MountainTundra"] = {
 			plotType = PlotTypes.PLOT_MOUNTAIN,
-			terrainType = GameInfoTypes["TERRAIN_TUNDRA"],
+			terrainType = terrainTundra,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["MountainSnow"] = {
 			plotType = PlotTypes.PLOT_MOUNTAIN,
-			terrainType = GameInfoTypes["TERRAIN_SNOW"],
+			terrainType = terrainSnow,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["Snow"] = {
 			plotType = PlotTypes.PLOT_LAND,
-			terrainType = GameInfoTypes["TERRAIN_SNOW"],
+			terrainType = terrainSnow,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["HillsSnow"] = {
 			plotType = PlotTypes.PLOT_HILLS,
-			terrainType = GameInfoTypes["TERRAIN_SNOW"],
+			terrainType = terrainSnow,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["Tundra"] = {
 			plotType = PlotTypes.PLOT_LAND,
-			terrainType = GameInfoTypes["TERRAIN_TUNDRA"],
+			terrainType = terrainTundra,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["HillsTundra"] = {
 			plotType = PlotTypes.PLOT_HILLS,
-			terrainType = GameInfoTypes["TERRAIN_TUNDRA"],
+			terrainType = terrainTundra,
 			feature = FeatureTypes.NO_FEATURE,
 		},
 		["HillsTundraForest"] = {
 			plotType = PlotTypes.PLOT_HILLS,
-			terrainType = GameInfoTypes["TERRAIN_TUNDRA"],
+			terrainType = terrainTundra,
 			feature = FeatureTypes.FEATURE_FOREST,
 		},
 		["TundraForest"] = {
 			plotType = PlotTypes.PLOT_LAND,
-			terrainType = GameInfoTypes["TERRAIN_TUNDRA"],
+			terrainType = terrainTundra,
 			feature = FeatureTypes.FEATURE_FOREST,
 		},
 	}
@@ -643,28 +653,30 @@ end
 
 local function setNesses()
 
-	terrainAlly[GameInfoTypes["TERRAIN_TUNDRA"]] = GameInfoTypes["TERRAIN_SNOW"]
-	terrainAlly[GameInfoTypes["TERRAIN_SNOW"]] = GameInfoTypes["TERRAIN_TUNDRA"]
-	terrainAlly[GameInfoTypes["TERRAIN_PLAINS"]] = GameInfoTypes["TERRAIN_GRASS"]
-	terrainAlly[GameInfoTypes["TERRAIN_GRASS"]] = GameInfoTypes["TERRAIN_PLAINS"]
+	terrainAlly[terrainTundra] = terrainSnow
+	terrainAlly[terrainSnow] = terrainTundra
+	terrainAlly[terrainPlains] = terrainGrass
+	terrainAlly[terrainGrass] = terrainPlains
 
-	possibleFeatures[GameInfoTypes["TERRAIN_GRASS"]] = 4
-	possibleFeatures[GameInfoTypes["TERRAIN_PLAINS"]] = 2
-	possibleFeatures[GameInfoTypes["TERRAIN_TUNDRA"]] = 2
-	possibleFeatures[GameInfoTypes["TERRAIN_DESERT"]] = 2
-	possibleFeatures[GameInfoTypes["TERRAIN_SNOW"]] = 1
+	terrainAllies
 
-	terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = 40, }
-	terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 10, maxi = 50, }
-	terrainLatitudes[GameInfoTypes["TERRAIN_TUNDRA"]] = { mini = 50, maxi = 75, }
-	terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 15, maxi = 45, }
-	terrainLatitudes[GameInfoTypes["TERRAIN_SNOW"]] = { mini = 70, maxi = 90, }
+	possibleFeatures[terrainGrass] = 4
+	possibleFeatures[terrainPlains] = 2
+	possibleFeatures[terrainTundra] = 2
+	possibleFeatures[terrainDesert] = 2
+	possibleFeatures[terrainSnow] = 1
+
+	terrainLatitudes[terrainGrass] = { mini = 0, maxi = 40, }
+	terrainLatitudes[terrainPlains] = { mini = 10, maxi = 50, }
+	terrainLatitudes[terrainTundra] = { mini = 50, maxi = 75, }
+	terrainLatitudes[terrainDesert] = { mini = 15, maxi = 45, }
+	terrainLatitudes[terrainSnow] = { mini = 70, maxi = 90, }
 
 	featureLatitudes[FeatureTypes.NO_FEATURE] = { mini = 0, maxi = 90, }
 	featureLatitudes[FeatureTypes.FEATURE_FOREST] = { mini = 25, maxi = 60 }
 	featureLatitudes[FeatureTypes.FEATURE_JUNGLE] = { mini = 0, maxi = 30, }
-	featureLatitudes[FeatureTypes.FEATURE_MARSH] = terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]]
-	featureLatitudes[FeatureTypes.FEATURE_OASIS] = terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]]
+	featureLatitudes[FeatureTypes.FEATURE_MARSH] = terrainLatitudes[terrainGrass]
+	featureLatitudes[FeatureTypes.FEATURE_OASIS] = terrainLatitudes[terrainDesert]
 	featureLatitudes[FeatureTypes.FEATURE_ICE] = { mini = 70, maxi = 90, }
 
 	fness[FeatureTypes.NO_FEATURE] = 1.0
@@ -687,15 +699,15 @@ local function setNesses()
 	end
 
 	if temperature == 1 then
-		terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = 30, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 10, maxi = 40, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_TUNDRA"]] = { mini = 40, maxi = 70, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 5, maxi = 35, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_SNOW"]] = { mini = 60, maxi = 90, }
+		terrainLatitudes[terrainGrass] = { mini = 0, maxi = 30, }
+		terrainLatitudes[terrainPlains] = { mini = 10, maxi = 40, }
+		terrainLatitudes[terrainTundra] = { mini = 40, maxi = 70, }
+		terrainLatitudes[terrainDesert] = { mini = 5, maxi = 35, }
+		terrainLatitudes[terrainSnow] = { mini = 60, maxi = 90, }
 		featureLatitudes[FeatureTypes.FEATURE_FOREST] = { mini = 15, maxi = 50 }
 		featureLatitudes[FeatureTypes.FEATURE_JUNGLE] = { mini = 0, maxi = 10, }
-		featureLatitudes[FeatureTypes.FEATURE_MARSH] = terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]]
-		featureLatitudes[FeatureTypes.FEATURE_OASIS] = terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]]
+		featureLatitudes[FeatureTypes.FEATURE_MARSH] = terrainLatitudes[terrainGrass]
+		featureLatitudes[FeatureTypes.FEATURE_OASIS] = terrainLatitudes[terrainDesert]
 		featureLatitudes[FeatureTypes.FEATURE_ICE] = { mini = 60, maxi = 90, }
 		if rainfall == 1 then
 			featureLatitudes[FeatureTypes.FEATURE_FOREST] = { mini = 10, maxi = 40 }
@@ -719,20 +731,20 @@ local function setNesses()
 			pWorld = "Temperate Wet"
 		end
 	elseif temperature == 3 then
-		terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = 50, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 20, maxi = 60, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_TUNDRA"]] = { mini = 60, maxi = 85, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 10, maxi = 60, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_SNOW"]] = { mini = 80, maxi = 90, }
+		terrainLatitudes[terrainGrass] = { mini = 0, maxi = 50, }
+		terrainLatitudes[terrainPlains] = { mini = 20, maxi = 60, }
+		terrainLatitudes[terrainTundra] = { mini = 60, maxi = 85, }
+		terrainLatitudes[terrainDesert] = { mini = 10, maxi = 60, }
+		terrainLatitudes[terrainSnow] = { mini = 80, maxi = 90, }
 		featureLatitudes[FeatureTypes.FEATURE_FOREST] = { mini = 35, maxi = 70 }
 		featureLatitudes[FeatureTypes.FEATURE_JUNGLE] = { mini = 0, maxi = 40 }
-		featureLatitudes[FeatureTypes.FEATURE_MARSH] = terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]]
-		featureLatitudes[FeatureTypes.FEATURE_OASIS] = terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]]
+		featureLatitudes[FeatureTypes.FEATURE_MARSH] = terrainLatitudes[terrainGrass]
+		featureLatitudes[FeatureTypes.FEATURE_OASIS] = terrainLatitudes[terrainDesert]
 		featureLatitudes[FeatureTypes.FEATURE_ICE] = { mini = 80, maxi = 90, }
 		if rainfall == 1 then
-			terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = 30, }
-			terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = 5, maxi = 65, }
-			terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = 20, maxi = 70, }
+			terrainLatitudes[terrainGrass] = { mini = 0, maxi = 30, }
+			terrainLatitudes[terrainDesert] = { mini = 5, maxi = 65, }
+			terrainLatitudes[terrainPlains] = { mini = 20, maxi = 70, }
 			pWorld = "Hot Arid"
 		elseif rainfall == 2 then
 			pWorld = "Hot"
@@ -746,19 +758,19 @@ local function setNesses()
 		fcurve[FeatureTypes.FEATURE_FOREST] = { dice = 1, invert = false, maximum = 0.1, }
 		fness[FeatureTypes.FEATURE_JUNGLE] = 0.0
 		fness[FeatureTypes.FEATURE_MARSH] = 0.0
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 2
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 3
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 10
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 20
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 5
+		tmult[terrainGrass] = 2
+		tmult[terrainPlains] = 3
+		tmult[terrainDesert] = 10
+		tmult[terrainTundra] = 20
+		tmult[terrainSnow] = 5
 		baseTile = "Desert"
 	elseif pWorld == "Cold" then
 		fness[FeatureTypes.FEATURE_JUNGLE] = 0.0
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 3
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 3
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 3
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 20
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 10
+		tmult[terrainGrass] = 3
+		tmult[terrainPlains] = 3
+		tmult[terrainDesert] = 3
+		tmult[terrainTundra] = 20
+		tmult[terrainSnow] = 10
 		baseTile = "Snow"
 	elseif pWorld == "Cold Wet" then
 		fness[FeatureTypes.FEATURE_FOREST] = 1.0
@@ -767,11 +779,11 @@ local function setNesses()
 		fness[FeatureTypes.FEATURE_MARSH] = 0.25
 		fcurve[FeatureTypes.FEATURE_MARSH] = { dice = 1, invert = false, maximum = 0.4, }
 		fcurve[FeatureTypes.NO_FEATURE] = { dice = 1, invert = false, maximum = 0.5, }
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 4
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 6
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 2
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 20
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 20
+		tmult[terrainGrass] = 4
+		tmult[terrainPlains] = 6
+		tmult[terrainDesert] = 2
+		tmult[terrainTundra] = 20
+		tmult[terrainSnow] = 20
 		baseTile = "TundraForest"
 	elseif pWorld == "Temperate Arid" then
 		fness[FeatureTypes.FEATURE_FOREST] = 0.1
@@ -779,20 +791,20 @@ local function setNesses()
 		fness[FeatureTypes.FEATURE_JUNGLE] = 0.1
 		fcurve[FeatureTypes.FEATURE_JUNGLE] = { dice = 1, invert = false, maximum = 0.1, }
 		fness[FeatureTypes.FEATURE_MARSH] = 0.0
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 3
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 10
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 20
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 4
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 2
+		tmult[terrainGrass] = 3
+		tmult[terrainPlains] = 10
+		tmult[terrainDesert] = 20
+		tmult[terrainTundra] = 4
+		tmult[terrainSnow] = 2
 		baseTile = "Desert"
 	elseif pWorld == "Temperate" then
 		fness[FeatureTypes.FEATURE_FOREST] = 0.7
 		fness[FeatureTypes.FEATURE_JUNGLE] = 0.5
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 20
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 20
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 12
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 6
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 6
+		tmult[terrainGrass] = 20
+		tmult[terrainPlains] = 20
+		tmult[terrainDesert] = 12
+		tmult[terrainTundra] = 6
+		tmult[terrainSnow] = 6
 		baseTile = "Grass"
 	elseif pWorld == "Temperate Wet" then
 		fness[FeatureTypes.FEATURE_FOREST] = 1.0
@@ -802,11 +814,11 @@ local function setNesses()
 		fness[FeatureTypes.FEATURE_MARSH] = 0.25
 		fcurve[FeatureTypes.FEATURE_MARSH] = { dice = 1, invert = false, maximum = 0.4, }
 		fcurve[FeatureTypes.NO_FEATURE] = { dice = 1, invert = false, maximum = 0.5, }
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 20
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 12
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 2
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 3
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 6
+		tmult[terrainGrass] = 20
+		tmult[terrainPlains] = 12
+		tmult[terrainDesert] = 2
+		tmult[terrainTundra] = 3
+		tmult[terrainSnow] = 6
 		baseTile = "GrassForest"
 	elseif pWorld == "Hot Arid" then
 		fness[FeatureTypes.FEATURE_FOREST] = 0.1
@@ -814,22 +826,22 @@ local function setNesses()
 		fness[FeatureTypes.FEATURE_JUNGLE] = 0.3
 		fcurve[FeatureTypes.FEATURE_JUNGLE] = { dice = 1, invert = false, maximum = 0.3, }
 		fness[FeatureTypes.FEATURE_MARSH] = 0.0
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 6
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 6
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 20
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 1
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 1
+		tmult[terrainGrass] = 6
+		tmult[terrainPlains] = 6
+		tmult[terrainDesert] = 20
+		tmult[terrainTundra] = 1
+		tmult[terrainSnow] = 1
 		baseTile = "Desert"
 	elseif pWorld == "Hot" then
 		fness[FeatureTypes.FEATURE_JUNGLE] = 1.0
 		fcurve[FeatureTypes.FEATURE_JUNGLE] = { dice = 3, invert = true, maximum = 1.0, }
 		fness[FeatureTypes.FEATURE_FOREST] = 0.3
 		fcurve[FeatureTypes.FEATURE_FOREST] = { dice = 1, invert = true, maximum = 1.0, }
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 20
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 18
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 13
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 1
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 1
+		tmult[terrainGrass] = 20
+		tmult[terrainPlains] = 18
+		tmult[terrainDesert] = 13
+		tmult[terrainTundra] = 1
+		tmult[terrainSnow] = 1
 		baseTile = "Grass"
 	elseif pWorld == "Hot Wet" then
 		fness[FeatureTypes.FEATURE_FOREST] = 0.5
@@ -839,24 +851,24 @@ local function setNesses()
 		fness[FeatureTypes.FEATURE_MARSH] = 0.25
 		fcurve[FeatureTypes.FEATURE_MARSH] = { dice = 1, invert = false, maximum = 0.4, }
 		fcurve[FeatureTypes.NO_FEATURE] = { dice = 1, invert = false, maximum = 0.5, }
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = 20
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 6
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = 2
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 1
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = 1
+		tmult[terrainGrass] = 20
+		tmult[terrainPlains] = 6
+		tmult[terrainDesert] = 2
+		tmult[terrainTundra] = 1
+		tmult[terrainSnow] = 1
 		baseTile = "PlainsJungle"
 	elseif pWorld == "Random" then
 		local grasslat = math.random(30,50)
 		print("random max grass latitude", grasslat)
-		terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]] = { mini = 0, maxi = grasslat, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_PLAINS"]] = { mini = grasslat - 10, maxi = grasslat + 10, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_TUNDRA"]] = { mini = grasslat + 10, maxi = grasslat + 25, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]] = { mini = grasslat - 25, maxi = grasslat + 5, }
-		terrainLatitudes[GameInfoTypes["TERRAIN_SNOW"]] = { mini = grasslat + 20, maxi = 90, }
+		terrainLatitudes[terrainGrass] = { mini = 0, maxi = grasslat, }
+		terrainLatitudes[terrainPlains] = { mini = grasslat - 10, maxi = grasslat + 10, }
+		terrainLatitudes[terrainTundra] = { mini = grasslat + 10, maxi = grasslat + 25, }
+		terrainLatitudes[terrainDesert] = { mini = grasslat - 25, maxi = grasslat + 5, }
+		terrainLatitudes[terrainSnow] = { mini = grasslat + 20, maxi = 90, }
 		featureLatitudes[FeatureTypes.FEATURE_FOREST] = { mini = grasslat - 15, maxi = grasslat + 15 }
 		featureLatitudes[FeatureTypes.FEATURE_JUNGLE] = { mini = 0, maxi = grasslat - 10 }
-		featureLatitudes[FeatureTypes.FEATURE_MARSH] = terrainLatitudes[GameInfoTypes["TERRAIN_GRASS"]]
-		featureLatitudes[FeatureTypes.FEATURE_OASIS] = terrainLatitudes[GameInfoTypes["TERRAIN_DESERT"]]
+		featureLatitudes[FeatureTypes.FEATURE_MARSH] = terrainLatitudes[terrainGrass]
+		featureLatitudes[FeatureTypes.FEATURE_OASIS] = terrainLatitudes[terrainDesert]
 		featureLatitudes[FeatureTypes.FEATURE_ICE] = { mini = grasslat + 20, maxi = 90, }
 
 		fness[FeatureTypes.FEATURE_JUNGLE] = math.random()
@@ -866,21 +878,21 @@ local function setNesses()
 		fness[FeatureTypes.FEATURE_MARSH] = math.random() * 0.25
 		fcurve[FeatureTypes.FEATURE_MARSH] = { dice = 1, invert = false, maximum = math.random() * 0.4, }
 		fcurve[FeatureTypes.NO_FEATURE] = { dice = 1, invert = false, maximum = math.min(math.random()+0.5, 1), }
-		tmult[GameInfoTypes["TERRAIN_GRASS"]] = math.random(1,20)
-		tmult[GameInfoTypes["TERRAIN_PLAINS"]] = math.random(1,20)
-		tmult[GameInfoTypes["TERRAIN_DESERT"]] = math.random(1,20)
-		tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = math.random(1,20)
-		tmult[GameInfoTypes["TERRAIN_SNOW"]] = math.random(1,20)
+		tmult[terrainGrass] = math.random(1,20)
+		tmult[terrainPlains] = math.random(1,20)
+		tmult[terrainDesert] = math.random(1,20)
+		tmult[terrainTundra] = math.random(1,20)
+		tmult[terrainSnow] = math.random(1,20)
 	end
 
 	if useLatitude == true then
 		fness[FeatureTypes.FEATURE_FOREST] = math.min(fness[FeatureTypes.FEATURE_FOREST] * 1.4, 1.0)
 		fness[FeatureTypes.FEATURE_JUNGLE] = math.min(fness[FeatureTypes.FEATURE_JUNGLE] * 1.4, 1.0)
-		if tmult[GameInfoTypes["TERRAIN_GRASS"]] == 0 then tmult[GameInfoTypes["TERRAIN_GRASS"]] = 1 end
-		if tmult[GameInfoTypes["TERRAIN_PLAINS"]] == 0 then tmult[GameInfoTypes["TERRAIN_PLAINS"]] = 1 end
-		if tmult[GameInfoTypes["TERRAIN_DESERT"]] == 0 then tmult[GameInfoTypes["TERRAIN_DESERT"]] = 1 end
-		if tmult[GameInfoTypes["TERRAIN_TUNDRA"]] == 0 then tmult[GameInfoTypes["TERRAIN_TUNDRA"]] = 1 end
-		if tmult[GameInfoTypes["TERRAIN_SNOW"]] == 0 then tmult[GameInfoTypes["TERRAIN_SNOW"]] = 1 end
+		if tmult[terrainGrass] == 0 then tmult[terrainGrass] = 1 end
+		if tmult[terrainPlains] == 0 then tmult[terrainPlains] = 1 end
+		if tmult[terrainDesert] == 0 then tmult[terrainDesert] = 1 end
+		if tmult[terrainTundra] == 0 then tmult[terrainTundra] = 1 end
+		if tmult[terrainSnow] == 0 then tmult[terrainSnow] = 1 end
 	end
 
 end
@@ -1685,7 +1697,7 @@ local function growContinents()
 							addedCoast[dindex] = true
 							coastLevel[dindex] = 1
 	--						local dplot = Map.GetPlotByIndex(index - 1)
-	--						if dplot ~= nil then dplot:SetTerrainType(TerrainTypes.TERRAIN_COAST) end
+	--						if dplot ~= nil then dplot:SetTerrainType(terrainCoast) end
 						end
 					end
 				end
@@ -2583,9 +2595,9 @@ function GeneratePlotTypes()
 		if continentalTiles[index] == nil then
 			plot:SetPlotType(3)
 			if isCoast[index] then
---				plot:SetTerrainType(TerrainTypes.TERRAIN_COAST)
+--				plot:SetTerrainType(terrainCoast)
 			else
-				plot:SetTerrainType(TerrainTypes.TERRAIN_OCEAN)
+				plot:SetTerrainType(terrainOcean)
 			end
 		else
 			if tileTiles[index] == nil then
@@ -2653,10 +2665,10 @@ function GenerateTerrain()
 			if useLatitude == true then
 				local x, y = getXY(index)
 				if y == yMax - 1 or y == 0 then
-					plot:SetTerrainType(TerrainTypes.TERRAIN_SNOW, false, false)
+					plot:SetTerrainType(terrainSnow, false, false)
 				elseif y == yMax - 2 or y == 1 then
-					if tile.terrainType ~= TerrainTypes.TERRAIN_SNOW then
-						plot:SetTerrainType(TerrainTypes.TERRAIN_TUNDRA, false, false)
+					if tile.terrainType ~= terrainSnow then
+						plot:SetTerrainType(terrainTundra, false, false)
 					end
 				end
 			end
@@ -2701,7 +2713,7 @@ function AddFeatures()
 			end
 			if plot:CanHaveFeature(feature) then
 				plot:SetFeatureType(feature)
-			elseif (plot:GetPlotType() == PlotTypes.PLOT_LAND or plot:GetPlotType() == PlotTypes.PLOT_HILLS) and plot:GetTerrainType() == TerrainTypes.TERRAIN_PLAINS and feature == FeatureTypes.FEATURE_JUNGLE then
+			elseif (plot:GetPlotType() == PlotTypes.PLOT_LAND or plot:GetPlotType() == PlotTypes.PLOT_HILLS) and plot:GetTerrainType() == terrainPlains and feature == FeatureTypes.FEATURE_JUNGLE then
 				-- for some reason civ 5's own checks don't think that jungle should occur on plains
 				plot:SetFeatureType(feature)
 			end
@@ -2782,7 +2794,7 @@ function AddFeatures()
 			print("bad mountain plot", p, t, f, "at", index)
 		end
 		if t > 6 then print ("mountain or hill terrain", p, t, f, "at", index) end
-		if f == FeatureTypes.FEATURE_JUNGLE and t ~= TerrainTypes.TERRAIN_PLAINS then
+		if f == FeatureTypes.FEATURE_JUNGLE and t ~= terrainPlains then
 			print ("jungle not on plains", p, t, f, "at", index)
 		end
 	end
