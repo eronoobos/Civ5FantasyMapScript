@@ -122,10 +122,7 @@ function GetMapScriptInfo()
                 DefaultValue = 1,
                 SortPriority = 1,
             },
-			temperature,
-			rainfall,
-			resources,
-			{
+            {
             	Name = "Mountain Clumpiness",
             	Values = {
             		"Epic Clumps",
@@ -137,9 +134,26 @@ function GetMapScriptInfo()
             	DefaultValue = 2,
             	SortPriority = 1,
             },
+			temperature,
+			rainfall,
+			resources,
 		},
 	};
 end
+
+----------------------------------------------------------------------------------
+
+local oceanSizeOption = Map.GetCustomOption(1)
+local waterDepthOption = Map.GetCustomOption(2)
+local continentSizeOption = Map.GetCustomOption(3)
+local continentShapeOption = Map.GetCustomOption(4)
+local islandAmountOption = Map.GetCustomOption(5)
+local worldAgeOption = Map.GetCustomOption(6)
+local regionSizeOption = Map.GetCustomOption(7)
+local latitudeSensitiveOption = Map.GetCustomOption(8)
+local mountainClumpinessOption = Map.GetCustomOption(9)
+local temperatureOption = Map.GetCustomOption(10)
+local rainfallOption = Map.GetCustomOption(11)
 
 ----------------------------------------------------------------------------------
 
@@ -241,7 +255,6 @@ local nearOceanIce = {}
 local terrainMaxArea = {}
 local terrainFilledTiles = {}
 local biggestContinentSize = 0
-
 ----
 
 
@@ -262,126 +275,126 @@ end
 
 local function setBeforeOptions()
 	-- ocean size
-	if Map.GetCustomOption(1) == 1 then
+	if oceanSizeOption == 1 then
 		landRatio = 0.94
-	elseif Map.GetCustomOption(1) == 2 then
+	elseif oceanSizeOption == 2 then
 		landRatio = 0.75
-	elseif Map.GetCustomOption(1) == 3 then
+	elseif oceanSizeOption == 3 then
 		landRatio = 0.6
-	elseif Map.GetCustomOption(1) == 4 then
+	elseif oceanSizeOption == 4 then
 		landRatio = 0.5
-	elseif Map.GetCustomOption(1) == 5 then
+	elseif oceanSizeOption == 5 then
 		landRatio = 0.29
-	elseif Map.GetCustomOption(1) == 6 then
+	elseif oceanSizeOption == 6 then
 		landRatio = 0.15
-	elseif Map.GetCustomOption(1) == 7 then
+	elseif oceanSizeOption == 7 then
 		landRatio = 0.02
-	elseif Map.GetCustomOption(1) == 8 then
+	elseif oceanSizeOption == 8 then
 		landRatio = ((math.random() ^ 1.75) * 0.92) + 0.02
 		print("random land ratio: ", landRatio)
 	end
 
 	-- water depth
-	if Map.GetCustomOption(2) == 1 then
+	if waterDepthOption == 1 then
 		coastRecedeChance = 1.0
 		coastExpandChance = 0.0
-	elseif Map.GetCustomOption(2) == 2 then
+	elseif waterDepthOption == 2 then
 		coastRecedeChance = 0.0
 		coastExpandChance = 0.0
-	elseif Map.GetCustomOption(2) == 3 then
+	elseif waterDepthOption == 3 then
 		coastRecedeChance = 0.0
 		coastExpandChance = 0.15
-	elseif Map.GetCustomOption(2) == 4 then
+	elseif waterDepthOption == 4 then
 		coastRecedeChance = 0.67
 		coastExpandChance = 1.0
 	end
 
 		-- continent size
-	if Map.GetCustomOption(3) == 1 then -- tiny
+	if continentSizeOption == 1 then -- tiny
 		cSizeMin = 11
 		cSizeMax = 50
-	elseif Map.GetCustomOption(3) == 2 then -- small
+	elseif continentSizeOption == 2 then -- small
 		cSizeMin = 25
 		cSizeMax = 200
-	elseif Map.GetCustomOption(3) == 3 then -- medium
+	elseif continentSizeOption == 3 then -- medium
 		cSizeMin = 70
 		cSizeMax = 540
-	elseif Map.GetCustomOption(3) == 4 then -- big
+	elseif continentSizeOption == 4 then -- big
 		cSizeMin = 170
 		cSizeMax = 1300
-	elseif Map.GetCustomOption(3) == 5 then -- pangaea
+	elseif continentSizeOption == 5 then -- pangaea
 		pangaea = true
 		cSizeMin = 11
 		cSizeMax = 180
 		ismuthChance = 1.0
-	elseif Map.GetCustomOption(3) == 6 then -- random
+	elseif continentSizeOption == 6 then -- random
 		cSizeMin = math.ceil( ((math.random() ^ 1.44) * 158) + 12 )
 		cSizeMax = math.ceil( cSizeMin * 7.7 )
 		print("random min size: ", cSizeMin, "  random max size: ", cSizeMax)
 	end
 
 	-- continent shape
-	if Map.GetCustomOption(4) == 1 then --extra snakey
+	if continentShapeOption == 1 then --extra snakey
 		paintedRatio = 1.0
 		continentLargeBrushChance = 100
-	elseif Map.GetCustomOption(4) == 2 then --total snakes
+	elseif continentShapeOption == 2 then --total snakes
 		paintedRatio = 1.0
-	elseif Map.GetCustomOption(4) == 3 then --snakey
+	elseif continentShapeOption == 3 then --snakey
 		paintedRatio = 0.8
-	elseif Map.GetCustomOption(4) == 4 then --normal
+	elseif continentShapeOption == 4 then --normal
 		paintedRatio = 0.5
-	elseif Map.GetCustomOption(4) == 5 then -- blobby
+	elseif continentShapeOption == 5 then -- blobby
 		paintedRatio = 0.3
-	elseif Map.GetCustomOption(4) == 6 then -- total blobs
+	elseif continentShapeOption == 6 then -- total blobs
 		paintedRatio = 0.1
-	elseif Map.GetCustomOption(4) == 7 then -- random
+	elseif continentShapeOption == 7 then -- random
 		paintedRatio = (math.random() * 0.9) + 0.1
 		print("random painted ratio: ", paintedRatio)
 	end
 
 	-- island amount
-	if Map.GetCustomOption(5) == 1 then --none
+	if islandAmountOption == 1 then --none
 		islandRatio = 0.0
-	elseif Map.GetCustomOption(5) == 2 then --few
+	elseif islandAmountOption == 2 then --few
 		islandRatio = 0.03
-	elseif Map.GetCustomOption(5) == 3 then --some
+	elseif islandAmountOption == 3 then --some
 		islandRatio = 0.06
-	elseif Map.GetCustomOption(5) == 4 then --lots
+	elseif islandAmountOption == 4 then --lots
 		islandRatio = 0.25
-	elseif Map.GetCustomOption(5) == 5 then -- tons
+	elseif islandAmountOption == 5 then -- tons
 		islandRatio = 0.5
-	elseif Map.GetCustomOption(5) == 6 then -- random
+	elseif islandAmountOption == 6 then -- random
 		islandRatio = (diceRoll(3, false, 1) ^ 3) * 0.5
 		print("random island percentage: ", math.floor(islandRatio * 100))
 	end
 
 	-- world age
-	if Map.GetCustomOption(6) == 1 then
+	if worldAgeOption == 1 then
 		mountainRatio = 0.25
 		coastRangeRatio = 0.35
 		rangeHillRatio = 0.25
 		hillsness = 0.9
-	elseif Map.GetCustomOption(6) == 2 then
+	elseif worldAgeOption == 2 then
 		mountainRatio = 0.1
 		coastRangeRatio = 0.3
 		rangeHillRatio = 0.3
 		hillsness = 0.75
-	elseif Map.GetCustomOption(6) == 3 then
+	elseif worldAgeOption == 3 then
 		mountainRatio = 0.03
 		coastRangeRatio = 0.25
 		rangeHillRatio = 0.35
 		hillsness = 0.6
-	elseif Map.GetCustomOption(6) == 4 then
+	elseif worldAgeOption == 4 then
 		mountainRatio = 0.015
 		coastRangeRatio = 0.2
 		skinnyMountainRanges = true
 		rangeHillRatio = 0.4
 		hillsness = 0.5
-	elseif Map.GetCustomOption(6) == 5 then
+	elseif worldAgeOption == 5 then
 		mountainRatio = 0.0
 		levelMountains = 1.0
 		hillsness = 0.25
-	elseif Map.GetCustomOption(6) == 6 then
+	elseif worldAgeOption == 6 then
 		local mountainsFrodoMountains = math.random()
 		print("random mountainousness, 0 to 100: ", math.floor(mountainsFrodoMountains * 100))
 		mountainRatio = (mountainsFrodoMountains ^ 3.05) * 0.25
@@ -391,22 +404,22 @@ local function setBeforeOptions()
 	end
 
 	--region size
-	if Map.GetCustomOption(7) == 1 then -- tiny
+	if regionSizeOption == 1 then -- tiny
 		regionMinSize = 10
 		regionMaxSize = 20
-	elseif Map.GetCustomOption(7) == 2 then -- small
+	elseif regionSizeOption == 2 then -- small
 		regionMinSize = 20
 		regionMaxSize = 40
-	elseif Map.GetCustomOption(7) == 3 then -- medium
+	elseif regionSizeOption == 3 then -- medium
 		regionMinSize = 40
 		regionMaxSize = 80
-	elseif Map.GetCustomOption(7) == 4 then -- big
+	elseif regionSizeOption == 4 then -- big
 		regionMinSize = 80
 		regionMaxSize = 140
-	elseif Map.GetCustomOption(7) == 5 then -- Ginormous
+	elseif regionSizeOption == 5 then -- Ginormous
 		regionMinSize = 140
 		regionMaxSize = 280
-	elseif Map.GetCustomOption(7) == 6 then -- random
+	elseif regionSizeOption == 6 then -- random
 		local r = math.random()
 		regionMinSize = math.ceil( ((r * 295) ^ 0.67) + 5 )
 		regionMaxSize = math.ceil( ((r * 580) ^ 0.77) + 20 )
@@ -414,42 +427,41 @@ local function setBeforeOptions()
 	end
 
 	-- latitude-based climate
-	if Map.GetCustomOption(8) == 1 then
+	if latitudeSensitiveOption == 1 then
 		useLatitude = false
-	elseif Map.GetCustomOption(8) == 2 then
+	elseif latitudeSensitiveOption == 2 then
 		useLatitude = true
 		polarIce = true
 		evadePoles = false
 	end
 
 	--temperature
-	if Map.GetCustomOption(9) == 1 then
+	if temperatureOption == 1 then
 		temperature = 1
 		iceChance = 0.7
-	elseif Map.GetCustomOption(9) == 2 then
+	elseif temperatureOption == 2 then
 		temperature = 2
 		iceChance = 0.6
-	elseif Map.GetCustomOption(9) == 3 then
+	elseif temperatureOption == 3 then
 		temperature = 3
 		iceChance = 0.5
-	elseif Map.GetCustomOption(9) == 4 then
+	elseif temperatureOption == 4 then
 		temperature = -1
 		iceChance = (math.random() * 0.2) + 0.5
 	end
 
 	--rainfall
-	if Map.GetCustomOption(10) == 1 then
+	if rainfallOption == 1 then
 		rainfall = 1
-	elseif Map.GetCustomOption(10) == 2 then
+	elseif rainfallOption == 2 then
 		rainfall = 2
-	elseif Map.GetCustomOption(10) == 3 then
+	elseif rainfallOption == 3 then
 		rainfall = 3
-	elseif Map.GetCustomOption(10) == 4 then
+	elseif rainfallOption == 4 then
 		rainfall = -1
 	end
 
 	--mountain clumpiness
-	local mountainClumpinessOption = Map.GetCustomOption(12)
 	if mountainClumpinessOption ~= nil then
 		if mountainClumpinessOption == 1 then
 			mountainClumpiness = 1.0
@@ -470,7 +482,7 @@ end
 local function setAfterOptions()
 
 	-- ocean size and latitude-based climate
-	if Map.GetCustomOption(1) == 1 or Map.GetCustomOption(8) == 2 then
+	if oceanSizeOption == 1 or latitudeSensitiveOption == 2 then
 		southPole = -1
 		northPole = yMax
 		evadePoles = false
@@ -478,7 +490,7 @@ local function setAfterOptions()
 
 	--expand pangaea "continent size maximum" to half of land area
 	-- and half the number of islands
-	if Map.GetCustomOption(3) == 5 then
+	if continentSizeOption == 5 then
 		islandRatio = islandRatio / 2
 		cSizeMax = math.ceil( (landArea * (1 - islandRatio)) / 2 )
 	end
