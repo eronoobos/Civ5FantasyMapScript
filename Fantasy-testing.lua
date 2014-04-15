@@ -1,6 +1,6 @@
 -- Map Script: Fantasy
 -- Author: zoggop
--- version 17
+-- version 19
 
 --------------------------------------------------------------
 if include == nil then
@@ -136,24 +136,24 @@ function GetMapScriptInfo()
             },
 			temperature,
 			rainfall,
-			resources,
+			resources
 		},
 	};
 end
 
 ----------------------------------------------------------------------------------
 
-local oceanSizeOption = Map.GetCustomOption(1)
-local waterDepthOption = Map.GetCustomOption(2)
-local continentSizeOption = Map.GetCustomOption(3)
-local continentShapeOption = Map.GetCustomOption(4)
-local islandAmountOption = Map.GetCustomOption(5)
-local worldAgeOption = Map.GetCustomOption(6)
-local regionSizeOption = Map.GetCustomOption(7)
-local latitudeSensitiveOption = Map.GetCustomOption(8)
-local mountainClumpinessOption = Map.GetCustomOption(9)
-local temperatureOption = Map.GetCustomOption(10)
-local rainfallOption = Map.GetCustomOption(11)
+local oceanSizeOption
+local waterDepthOption
+local continentSizeOption
+local continentShapeOption
+local islandAmountOption
+local worldAgeOption
+local regionSizeOption
+local latitudeSensitiveOption
+local mountainClumpinessOption
+local temperatureOption
+local rainfallOption
 
 ----------------------------------------------------------------------------------
 
@@ -269,13 +269,13 @@ local biggestContinentSize = 0
 
 ----
 
-local terrainGrass = GameInfoTypes["TERRAIN_GRASS"]
-local terrainPlains = GameInfoTypes["TERRAIN_PLAINS"]
-local terrainDesert = GameInfoTypes["TERRAIN_DESERT"]
-local terrainTundra = GameInfoTypes["TERRAIN_TUNDRA"]
-local terrainSnow = GameInfoTypes["TERRAIN_SNOW"]
-local terrainCoast = GameInfoTypes["TERRAIN_COAST"]
-local terrainOcean = GameInfoTypes["TERRAIN_OCEAN"]
+local terrainGrass
+local terrainPlains
+local terrainDesert
+local terrainTundra
+local terrainSnow
+local terrainCoast
+local terrainOcean
 
 ----
 
@@ -295,6 +295,19 @@ end
 
 
 local function setBeforeOptions()
+
+	oceanSizeOption = Map.GetCustomOption(1)
+	waterDepthOption = Map.GetCustomOption(2)
+	continentSizeOption = Map.GetCustomOption(3)
+	continentShapeOption = Map.GetCustomOption(4)
+	islandAmountOption = Map.GetCustomOption(5)
+	worldAgeOption = Map.GetCustomOption(6)
+	regionSizeOption = Map.GetCustomOption(7)
+	latitudeSensitiveOption = Map.GetCustomOption(8)
+	mountainClumpinessOption = Map.GetCustomOption(9)
+	temperatureOption = Map.GetCustomOption(10)
+	rainfallOption = Map.GetCustomOption(11)
+
 	-- ocean size
 	if oceanSizeOption == 1 then
 		landRatio = 0.94
@@ -520,6 +533,15 @@ end
 
 
 local function setTileDictionary()
+
+	terrainGrass = GameInfoTypes["TERRAIN_GRASS"]
+	terrainPlains = GameInfoTypes["TERRAIN_PLAINS"]
+	terrainDesert = GameInfoTypes["TERRAIN_DESERT"]
+	terrainTundra = GameInfoTypes["TERRAIN_TUNDRA"]
+	terrainSnow = GameInfoTypes["TERRAIN_SNOW"]
+	terrainCoast = GameInfoTypes["TERRAIN_COAST"]
+	terrainOcean = GameInfoTypes["TERRAIN_OCEAN"]
+
 tileDictionary = {
 		["Plains"] = {
 			plotType = PlotTypes.PLOT_LAND,
@@ -993,7 +1015,7 @@ local function generateRegionType(latitude)
 		local featuresallocated = 0
 		repeat
 			local ttl
-			if mRandom() < thisallyness and allies ~= nil then
+			if mRandom() < thisallyness and alliesRoll ~= nil then
 				local ally = alliesRoll[mRandom(1, #alliesRoll)]
 				ttl = terrainList[ally]
 			else
@@ -2293,12 +2315,12 @@ local function collectRange(range, totalArea, perscribedArea)
 		area = totalArea - (areaDifference * mountainClumpiness)
 	end
 	print(totalArea, perscribedArea, areaDifference, area)
-	if area == 0 then return 0 end
+	if area == 0 then return {} end
 	local rangeBuffer = {}
 	for rangeIndex, localRange in pairs(range) do
 		table.insert(rangeBuffer, rangeIndex)
 	end
-	if #rangeBuffer <= 1 then return nil end
+	if #rangeBuffer <= 1 then return {} end
 
 	local originalArea = 0
 	if uniformMountainRanges then

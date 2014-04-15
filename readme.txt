@@ -6,7 +6,10 @@
 -- better system for figuring out where deep & shallow areas are for expanding coasts
 -- posibility of seperating regions with rivers?
 
-v16 --> v18
+v17 --> v18
+-- add mountain clumpiness, set it to 0.75 for more evenly distributed mountains
+
+v16 --> v17
 -- cut mountainousness to about 1/3 of before, to match default Continent script better
 
 v15 --> v16
