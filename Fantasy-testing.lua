@@ -1820,8 +1820,7 @@ local function growContinents()
 			sameAreaLeft = 0
 		end
 		lastContinentalTotalTiles = continentalTotalTiles
-		--missing:  continentalTotalTiles >= landArea
-	until continentalTotalTiles >= landArea or continentIndex > 512 or sameAreaLeft >= 10 or #soQuad[1] + #soQuad[2] + #soQuad[3] + #soQuad[4] < 24
+	until continentalTotalTiles >= landArea or continentIndex > 512 or sameAreaLeft > 9 or #soQuad[1] + #soQuad[2] + #soQuad[3] + #soQuad[4] < 24
 	print (continentalTotalTiles, continentIndex, sameAreaLeft, #soQuad[1], #soQuad[2], #soQuad[3], #soQuad[4], blockedTileCount)
 end
 
@@ -2052,6 +2051,7 @@ local function growRegions()
 	local filledTiles = 0
 	local regionIterations = 0
 	local sameAreaLeft = 0
+	local tinyRegionGrowth = 0
 	local lastFilledtiles = 0
 	repeat
 		regionIterations = regionIterations + 1
@@ -2119,8 +2119,13 @@ local function growRegions()
 		else
 			sameAreaLeft = 0
 		end
+		if filledTiles < smallestRegionSize then
+			tinyRegionGrowth = tinyRegionGrowth + 1
+		else
+			tinyRegionGrowth = 0
+		end
 		lastFilledtiles = filledTiles
-	until filledTiles >= totalTiles or regionIterations >= maxRegions or sameAreaLeft > 10 or #availableIndices < regionMinSize
+	until filledTiles >= totalTiles or regionIterations >= maxRegions or sameAreaLeft > 8 or tinyRegionGrowth > 8 or #availableIndices < regionMinSize
 	totalRegions = regionIterations
 end
 
@@ -2594,6 +2599,14 @@ local function popCoasts()
 	until #oBuffer <= 1
 end
 
+local function countBegin()
+	beginTime = os.time()
+end
+
+local function countEnd()
+	local elapsed = os.time() - beginTime
+	print(elapsed, " seconds elapsed")
+end
 
 ----
 
