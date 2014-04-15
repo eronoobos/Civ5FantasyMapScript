@@ -163,6 +163,8 @@ local mFloor = math.floor
 local mMin = math.min
 local mMax = math.max
 local mAbs = math.abs
+local tInsert = table.insert
+local tRemove = table.remove
 
 ----------------------------------------------------------------------------------
 
@@ -959,7 +961,7 @@ local function generateRegionType(latitude)
 		for tt, mult in pairs(tmult) do
 			if mult > 0 and latitude >= terrainLatitudes[tt].mini and latitude <= terrainLatitudes[tt].maxi then
 				for m = 1, mult do
-					table.insert(terrainsHere, tt)
+					tInsert(terrainsHere, tt)
 				end
 				print(tt, mult)
 			end
@@ -1076,7 +1078,7 @@ local function generateRegionType(latitude)
 			end
 			if i >= allocated and featuresallocated == possibleFeatures[terrainType] then break end
 			if insert == true then
-				table.insert(tlist, tileName)
+				tInsert(tlist, tileName)
 				totalf[tile.feature] = totalf[tile.feature] + 1
 --				print(tileName)
 				i = i + 1
@@ -1109,7 +1111,7 @@ local function prepareTileListByTerrain(terrainType)
 			tt = tile.terrainMasquerade
 		end
 		if tt == terrainType then
-			table.insert(list, tileName)
+			tInsert(list, tileName)
 --			print(terrainType, tileName)
 		end
 	end
@@ -1129,7 +1131,7 @@ local function prepareTerrainTileLists()
 		if #list > 0 then
 			terrainList[terrainType] = list
 			for i = 1, mult do
-				table.insert(terrains, terrainType)
+				tInsert(terrains, terrainType)
 			end
 		end
 	end
@@ -1144,7 +1146,7 @@ local function prepareTerrainTileLists()
 		terrainAlliesRoll[terrainType] = {}
 		for i, allyTerrainType in pairs(allies) do
 			for n = 1, tmult[allyTerrainType] do
-				table.insert(terrainAlliesRoll[terrainType], allyTerrainType)
+				tInsert(terrainAlliesRoll[terrainType], allyTerrainType)
 			end
 		end
 	end
@@ -1305,7 +1307,7 @@ local function fillQuadrants()
 		for y=ya, yb do
 			for x=xa, xb do
 				local index = getIndex(x, y)
-				table.insert(soQuad[q], index)
+				tInsert(soQuad[q], index)
 			end
 		end
 	end
@@ -1426,8 +1428,8 @@ local function paintContinent(x, y, continentIndex, continentSize, isolateContin
 --				if continentIndex == 1 then print("new tile!") end
 				continentalTiles[index] = continentIndex
 				filledContinentTiles = filledContinentTiles + 1
-				table.insert(continentalXY, { x = nx, y = ny })
-				table.insert(newTiles, index)
+				tInsert(continentalXY, { x = nx, y = ny })
+				tInsert(newTiles, index)
 				if nearcoast then continentConnected = true end
 			end
 		end
@@ -1531,21 +1533,21 @@ local function expandContinent(tiles, id, maxArea, maxIterations, isolateContine
 			end
 			if continentalTiles[index] == nil and ny > southPole and ny < northPole and neighbortest == true then
 				continentalTiles[index] = continentIndex
-				table.insert(continentalXY, { x = nx, y = ny })
-				table.insert(tileBuffer, index)
+				tInsert(continentalXY, { x = nx, y = ny })
+				tInsert(tileBuffer, index)
 
 				-- inserting certain directions twice decreases hexagonal tendency?
 				if directedness[d] > 0 then
-					for dd = 1, directedness[d] do table.insert(tileBuffer, index) end
+					for dd = 1, directedness[d] do tInsert(tileBuffer, index) end
 				end
 
 				-- inserting certain eighths around continental center of mass
 				local e = getEighth(centerx, centery, nx, ny)
 				if eighthFavoring[e] > 0 then
-					for i = 1, eighthFavoring[e] do table.insert(tileBuffer, index) end
+					for i = 1, eighthFavoring[e] do tInsert(tileBuffer, index) end
 				end
 
-				table.insert(newTiles, index)
+				tInsert(newTiles, index)
 				if nearcoast then continentConnected = true end
 				newCount = newCount + 1
 				if expandCounts[tileIndex] == nil then
@@ -1554,7 +1556,7 @@ local function expandContinent(tiles, id, maxArea, maxIterations, isolateContine
 					expandCounts[tileIndex] = expandCounts[tileIndex] + 1
 				end
 			elseif ny == 0 or ny == yMax - 1 then
-				table.remove(tileBuffer, bufferIndex)
+				tRemove(tileBuffer, bufferIndex)
 --				print("at pole", #tileBuffer)
 				if breakAtPoles then
 	--				print("continent terminated at pole", continentIndex)
@@ -1563,12 +1565,12 @@ local function expandContinent(tiles, id, maxArea, maxIterations, isolateContine
 			end
 			if ty <= 1 or ty >= yMax - 2 then
 				if evadePoles == true then
-					table.remove(tileBuffer, bufferIndex)
+					tRemove(tileBuffer, bufferIndex)
 				end
 			end
 			if newCount >= maxArea then break end
 		else -- if surrounded by friends, remove from expansion buffer
-			table.remove(tileBuffer, bufferIndex)
+			tRemove(tileBuffer, bufferIndex)
 --			print("can't expand", #tileBuffer)
 		end
 		if newCount == lastCount then
@@ -1614,7 +1616,7 @@ end
 local function growContinents()
 	-- fill stillOcean with all tiles
 	for i=1, mapArea do
-		table.insert(stillOcean, i)
+		tInsert(stillOcean, i)
 		local plot = Map.GetPlotByIndex(i - 1)
 		plot:SetPlotType(PlotTypes.PLOT_OCEAN)
 	end
@@ -1704,7 +1706,7 @@ local function growContinents()
 		if actualContinentSize > 0 and #cSizeTheory > 0 then
 			local closest = findClosest(actualContinentSize, cSizeTheory)
 			print("actual size", actualContinentSize, "  closest match", cSizeTheory[closest])
-			table.remove(cSizeTheory, closest)
+			tRemove(cSizeTheory, closest)
 		end
 
 		-- clear occupied continental tiles from available ocean tile list
@@ -1714,7 +1716,7 @@ local function growContinents()
 				local dx, dy = directionalTransform(d, x, y)
 				local dindex = getIndex(dx,dy)
 				if continentalTiles[dindex] == nil and isCoast[dindex] == nil and addedCoast[dindex] == nil then
-					table.insert(addCoast, dindex)
+					tInsert(addCoast, dindex)
 					addedCoast[dindex] = true
 					coastLevel[dindex] = 1
 				end
@@ -1732,7 +1734,7 @@ local function growContinents()
 
 		for i, index in pairs(stillOcean) do
 			if continentalTiles[index] ~= nil then
-				table.remove(stillOcean, i)
+				tRemove(stillOcean, i)
 				-- this is for coast generation / detection
 				local plot = Map.GetPlotByIndex(index - 1)
 				plot:SetPlotType(PlotTypes.PLOT_LAND)
@@ -1742,7 +1744,7 @@ local function growContinents()
 						local dx, dy = directionalTransform(d, x, y)
 						local dindex = getIndex(dx, dy)
 						if continentalTiles[dindex] == nil and isCoast[dindex] == nil and addedCoast[dindex] == nil then
-							table.insert(addCoast, dindex)
+							tInsert(addCoast, dindex)
 							addedCoast[dindex] = true
 							coastLevel[dindex] = 1
 	--						local dplot = Map.GetPlotByIndex(index - 1)
@@ -1758,7 +1760,7 @@ local function growContinents()
 		if #addCoast > 1 then
 			local coastBuffer = {}
 			for i,index in pairs(addCoast) do
-				table.insert(coastBuffer, index)
+				tInsert(coastBuffer, index)
 			end
 			local maxCoastLevel = 0
 			local coastLevelLimit = iH
@@ -1775,8 +1777,8 @@ local function growContinents()
 						local dx, dy = directionalTransform(d, x, y)
 						local dindex = getIndex(dx, dy)
 						if continentalTiles[dindex] == nil and isCoast[dindex] == nil and addedCoast[dindex] == nil then
-							table.insert(addCoast, dindex)
-							table.insert(coastBuffer, dindex)
+							tInsert(addCoast, dindex)
+							tInsert(coastBuffer, dindex)
 							addedCoast[dindex] = true
 							coastLevel[dindex] = coastLevel[index] + 1
 							if coastLevel[dindex] > maxCoastLevel then
@@ -1785,7 +1787,7 @@ local function growContinents()
 						end
 					end
 				end
-				table.remove(coastBuffer, i)
+				tRemove(coastBuffer, i)
 			until #coastBuffer <= 2 or maxCoastLevel >= coastLevelLimit or #addCoast >= blockedAreaLimit
 
 			print ("tiles blocked", #addCoast)
@@ -1796,7 +1798,7 @@ local function growContinents()
 					local index = addCoast[i]
 					isCoast[index] = continentIndex
 					blockedTileCount = blockedTileCount + 1
-					table.remove(addCoast, i)
+					tRemove(addCoast, i)
 				until #addCoast < 1 or blockedTileCount >= oceanArea
 --				print(blockedTileCount, oceanArea)
 				addCoast = {}
@@ -1809,7 +1811,7 @@ local function growContinents()
 		-- do the same for quandrant tile lists
 		for q = 1, 4 do
 			for i, index in pairs(soQuad[q]) do
-				if continentalTiles[index] ~= nil or isCoast[index] ~= nil then table.remove(soQuad[q], i) end
+				if continentalTiles[index] ~= nil or isCoast[index] ~= nil then tRemove(soQuad[q], i) end
 			end
 		end
 
@@ -1893,7 +1895,7 @@ local function paintRegion(x, y, regionIndex, regionName, regionSize)
 					tileTiles[index] = tileName
 					regionNames[index] = regionName
 					regionalTiles[index] = { regionIndex = regionIndex, painted = true }
-					table.insert(newTiles, index)
+					tInsert(newTiles, index)
 					filledRegionTiles = filledRegionTiles + 1
 					-- counting number of tiles of each terrain type
 					if terrainFilledTiles[tileDictionary[tileName].terrainType] == nil then
@@ -1903,13 +1905,13 @@ local function paintRegion(x, y, regionIndex, regionName, regionSize)
 					end
 				end
 			elseif continentalTiles[index] == nil and d > 0 then
---				if filledRegionTiles > 6 then table.insert(coastRange, centerIndex) end
+--				if filledRegionTiles > 6 then tInsert(coastRange, centerIndex) end
 				if keepItInside then
 					badDirections[d] = true
 					badDirectionTotal = badDirectionTotal + 1
 				end
 			elseif regionNames[index] ~= nil and regionNames[index] ~= regionName and d > 0 then
---				if filledRegionTiles > 6 then table.insert(regionRange, centerIndex) end
+--				if filledRegionTiles > 6 then tInsert(regionRange, centerIndex) end
 				if keepItInside then
 					badDirections[d] = true
 					badDirectionTotal = badDirectionTotal + 1
@@ -1990,7 +1992,7 @@ local function expandRegion(tiles, regionIndex, regionName, maxArea, maxIteratio
 							tileTiles[index] = tileName
 							regionNames[index] = regionName
 							regionalTiles[index] = { regionIndex = regionIndex, painted = false }
-							table.insert(tempTiles, index)
+							tInsert(tempTiles, index)
 							newCount = newCount + 1
 							-- counting number of tiles of each terrain type
 							if terrainFilledTiles[tileDictionary[tileName].terrainType] == nil then
@@ -2007,11 +2009,11 @@ local function expandRegion(tiles, regionIndex, regionName, maxArea, maxIteratio
 				if newCount >= maxArea then break end
 			end
 			if stopRegion == true then break end
-			table.remove(tileBuffer, bufferIndex)
+			tRemove(tileBuffer, bufferIndex)
 		until #tileBuffer <= 1 or newCount >= maxArea
 		tileBuffer = tempTiles
 		for i,v in pairs(tempTiles) do
-			table.insert(newTiles, v)
+			tInsert(newTiles, v)
 		end
 		iCount = iCount + 1
 --		print(newCount, maxArea, iCount, maxIterations)
@@ -2040,7 +2042,7 @@ local function growRegions()
 	-- gather available tiles to fill with regions
 	for nothing, xy in pairs(continentalXY) do
 		local index = getIndex(xy.x, xy.y)
-		table.insert(availableIndices, index)
+		tInsert(availableIndices, index)
 	end
 
 	print("setting by-terrain tile lists for procedural region types...")
@@ -2069,8 +2071,8 @@ local function growRegions()
 		repeat
 			region = generateRegionType(latitude)
 		until #region.tileList > 0 and #region.paintTileList > 0
-		table.insert(regionList, regionName)
-		table.insert(regionDictionary, region)
+		tInsert(regionList, regionName)
+		tInsert(regionDictionary, region)
 		totalRegions = #regionDictionary
 		local regionSize = mRandom(regionMinSize, regionMaxSize)
 		local regionPaintedSize = mFloor(regionSize * region.paintedRatio)
@@ -2080,7 +2082,7 @@ local function growRegions()
 		if #tiles > 0 then
 			tilesByRegion[regionIterations] = {}
 			for nothing,tindex in pairs(tiles) do
-				table.insert(tilesByRegion[regionIterations], tindex)
+				tInsert(tilesByRegion[regionIterations], tindex)
 			end
 		end
 		filledTiles = filledTiles + #tiles
@@ -2089,7 +2091,7 @@ local function growRegions()
 		if #expandedTiles > 0 then
 			if tilesByRegion[regionIterations] == nil then tilesByRegion[regionIndex] = {} end
 			for nothing,tindex in pairs(expandedTiles) do
-				table.insert(tilesByRegion[regionIterations], tindex)
+				tInsert(tilesByRegion[regionIterations], tindex)
 			end
 		end
 		filledTiles = filledTiles + #expandedTiles
@@ -2101,7 +2103,7 @@ local function growRegions()
 				tmult[terrainType] = 0
 				for i, tt in pairs(terrains) do
 					if tt == terrainType then
-						table.remove(terrains, i)
+						tRemove(terrains, i)
 					end
 				end
 			end
@@ -2109,7 +2111,7 @@ local function growRegions()
 
 		-- remove filled tiles from availableIndices
 		for ai, index in pairs(availableIndices) do
-			if tileTiles[index] ~= nil then table.remove(availableIndices, ai) end
+			if tileTiles[index] ~= nil then tRemove(availableIndices, ai) end
 		end
 		print(#availableIndices, "available tiles left")
 		regions[regionIterations] = { regionName = regionName, size = #tiles + #expandedTiles }
@@ -2140,7 +2142,7 @@ local function fillRegionGaps()
 				local dx, dy = directionalTransform(d, x, y)
 				local dindex = getIndex(dx, dy)
 				if regionNames[dindex] ~= nil then
-					table.insert(neighbors, dindex)
+					tInsert(neighbors, dindex)
 				end
 			end
 			if #neighbors > 0 then
@@ -2291,7 +2293,7 @@ local function findRangeTiles()
 			local rangeIndex = pairEm(regionalTiles[index].regionIndex, lastOther)
 --			print(rangeIndex, regionalTiles[index].regionIndex, lastOther)
 			if regionRange[rangeIndex] == nil then regionRange[rangeIndex] = {} end
-			table.insert(regionRange[rangeIndex], index)
+			tInsert(regionRange[rangeIndex], index)
 			regionRangeTileCount = regionRangeTileCount + 1
 --			print(i, x, y, index, selfCount, otherCount, oceanCount, regionName, "region")
 		-- before: oceanCount > 0 and oceanCount < 4 and rCount < 5
@@ -2302,7 +2304,7 @@ local function findRangeTiles()
 				rangeIndex = regionalTiles[index].regionIndex
 			end
 			if coastRange[rangeIndex] == nil then coastRange[rangeIndex] = {} end
-			table.insert(coastRange[rangeIndex], index)
+			tInsert(coastRange[rangeIndex], index)
 			coastRangeTileCount = coastRangeTileCount + 1
 --			print(i, x, y, index, selfCount, otherCount, oceanCount, regionName, "coast")
 		end
@@ -2323,7 +2325,7 @@ local function collectRange(range, totalArea, perscribedArea)
 	if area == 0 then return {} end
 	local rangeBuffer = {}
 	for rangeIndex, localRange in pairs(range) do
-		table.insert(rangeBuffer, rangeIndex)
+		tInsert(rangeBuffer, rangeIndex)
 	end
 	if #rangeBuffer <= 1 then return {} end
 
@@ -2357,12 +2359,12 @@ local function collectRange(range, totalArea, perscribedArea)
 			local check = true
 			if skinnyMountainRanges == true then check = mountainLineCheck(x, y) end
 			if check == true then
-				table.insert(collection, index)
+				tInsert(collection, index)
 				tilesCollected = tilesCollected + 1
 			end
 			if tilesCollected >= area then break end
 		end
-		table.remove(rangeBuffer, bufferIndex)
+		tRemove(rangeBuffer, bufferIndex)
 	until tilesCollected >= area or #rangeBuffer == 0
 	print(tilesCollected, "tiles collected of", totalArea)
 	return collection
@@ -2372,12 +2374,12 @@ end
 local function raiseRange(collection, area)
 	local buffer = {}
 	for i = 1, #collection do
-		table.insert(buffer, collection[i])
+		tInsert(buffer, collection[i])
 	end
 	local tilesRaised = 0
 	local mountainTiles = {}
 	repeat
-		local index = table.remove(buffer, mRandom(1, #buffer))
+		local index = tRemove(buffer, mRandom(1, #buffer))
 		local plot = Map.GetPlotByIndex(index - 1)
 		if plot ~= nil then
 			if mRandom() < rangeHillRatio then
@@ -2385,7 +2387,7 @@ local function raiseRange(collection, area)
 				--tilesRaised = tilesRaised + 0.5
 			else
 				plot:SetPlotType(PlotTypes.PLOT_MOUNTAIN, false, false)
-				table.insert(mountainTiles, index)
+				tInsert(mountainTiles, index)
 				tilesRaised = tilesRaised + 1
 			end
 		end
@@ -2416,13 +2418,13 @@ local function expandMountains(tilesRaised, area, mountainTiles)
 					local plot = Map.GetPlotByIndex(dindex - 1)
 					if mRandom() < rangeHillRatio and plot:GetPlotType() ~= PlotTypes.PLOT_HILLS and plot:GetPlotType() ~= PlotTypes.PLOT_MOUNTAIN then
 						plot:SetPlotType(PlotTypes.PLOT_HILLS, false, false)
-						table.insert(mountainBuffer, dindex)
+						tInsert(mountainBuffer, dindex)
 						noChange = 0
 						--tilesRaised = tilesRaised + 0.5
 					elseif plot:GetPlotType() ~= PlotTypes.PLOT_MOUNTAIN and plot:GetPlotType() ~= PlotTypes.PLOT_HILLS then
 						plot:SetPlotType(PlotTypes.PLOT_MOUNTAIN, false, false)
-						table.insert(mountainBuffer, dindex)
-						--table.remove(mountainBuffer, bufferIndex)
+						tInsert(mountainBuffer, dindex)
+						--tRemove(mountainBuffer, bufferIndex)
 						tilesRaised = tilesRaised + 1
 						noChange = 0
 					else
@@ -2431,9 +2433,9 @@ local function expandMountains(tilesRaised, area, mountainTiles)
 				else
 					noChange = noChange + 1
 				end
-				table.remove(dirs, di)
+				tRemove(dirs, di)
 			until #dirs == 0 or tilesRaised >= area
-			table.remove(mountainBuffer, bufferIndex)
+			tRemove(mountainBuffer, bufferIndex)
 		until tilesRaised >= area or noChange > 36 or #mountainBuffer == 0
 		print(tilesRaised, "tiles raised of", area, "(after expansion)")
 	end
@@ -2530,7 +2532,7 @@ local function popCoasts()
 							isNotFlat[nindex] = true
 						elseif t == 6 then -- deep ocean
 							deep = true
-							table.insert(deepTiles, nindex)
+							tInsert(deepTiles, nindex)
 						end
 						if f == FeatureTypes.FEATURE_ICE or p ~= 3 then
 							blockedCount = blockedCount + 1
@@ -2545,7 +2547,7 @@ local function popCoasts()
 							-- counting ocean tiles in a row
 							if od == nil or d - od == 1 then
 --								print("yes", od, d)
-								table.insert(oceanTiles, nindex)
+								tInsert(oceanTiles, nindex)
 								--print(nindex, d)
 								od = d
 							end
@@ -2595,7 +2597,7 @@ local function popCoasts()
 				end
 			end
 		end
-		table.remove(oBuffer, i)
+		tRemove(oBuffer, i)
 	until #oBuffer <= 1
 end
 
@@ -2810,7 +2812,7 @@ function AddFeatures()
 								iceHere = false
 								break
 							else
-								table.insert(nearice, dindex)
+								tInsert(nearice, dindex)
 							end
 						end
 					end

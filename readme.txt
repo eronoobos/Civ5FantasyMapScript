@@ -1,10 +1,13 @@
--- allow more than one ally, with probabilities for each and make the appearance of any ally dependent upon latitudes. (plains for example should have tundra, desert, and grassland)
 -- instead of base tile, any unoccupied continental tiles should be filled with a region as every other, which leaves the question why aren't they getting filled as normal by growRegions?
 -- add minimum to dice roll function (so that wet climates can more consistently put forests & jungles)?
 -- try to figure out what causes texture errors?
 -- code change: regionIndex and regionName are now redundant. merge them.
 -- better system for figuring out where deep & shallow areas are for expanding coasts
 -- posibility of seperating regions with rivers?
+
+v18 --> v19
+-- allow more than one ally, with probabilities for each and make the appearance of any ally dependent upon latitudes and also on non-latitude tmult. (plains for example have tundra, desert, and grassland)
+-- minor optimizations
 
 v17 --> v18
 -- add mountain clumpiness, set it to 0.75 for more evenly distributed mountains
