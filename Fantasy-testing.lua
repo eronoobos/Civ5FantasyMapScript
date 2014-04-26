@@ -87,14 +87,13 @@ function GetMapScriptInfo()
                 Name = "Continent Shape",
                 Values = {
 					"Extra Snakey",
-					"Total Snakes",
 					"Snakey",
 					"Normal",
 					"Blobby",
-                    "Total Blobs",
+                    "Extra Blobby",
 					"Random",
                 },
-                DefaultValue = 5,
+                DefaultValue = 4,
                 SortPriority = 2,
             },
 			{
@@ -448,17 +447,15 @@ local function setBeforeOptions()
 	if continentShapeOption == 1 then --extra snakey
 		paintedRatio = 1.0
 		continentLargeBrushChance = 100
-	elseif continentShapeOption == 2 then --total snakes
-		paintedRatio = 1.0
-	elseif continentShapeOption == 3 then --snakey
-		paintedRatio = 0.8
-	elseif continentShapeOption == 4 then --normal
+	elseif continentShapeOption == 2 then --snakey
+		paintedRatio = 0.7
+	elseif continentShapeOption == 3 then -- normal
 		paintedRatio = 0.5
-	elseif continentShapeOption == 5 then -- blobby
+	elseif continentShapeOption == 4 then -- blobby
 		paintedRatio = 0.3
-	elseif continentShapeOption == 6 then -- total blobs
+	elseif continentShapeOption == 5 then -- extra blobby
 		paintedRatio = 0.1
-	elseif continentShapeOption == 7 then -- random
+	elseif continentShapeOption == 6 then -- random
 		paintedRatio = (mRandom() * 0.9) + 0.1
 		print("random painted ratio: ", paintedRatio)
 	end
