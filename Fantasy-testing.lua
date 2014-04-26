@@ -47,6 +47,7 @@ function GetMapScriptInfo()
                 DefaultValue = 2,
                 SortPriority = 2,
             },
+            --[[
 			{
                 Name = "Continent Size",
                 Values = {
@@ -55,6 +56,28 @@ function GetMapScriptInfo()
 					"Medium",
 					"Big",
 					"Pangaea",
+					"Random",
+                },
+                DefaultValue = 3,
+                SortPriority = 2,
+            },
+            ]]--
+            {
+                Name = "Number of Major Continents",
+                Values = {
+					"Pangaea",
+					"One",
+					"Two",
+					"Three",
+					"Four",
+					"Five",
+					"Six",
+					"Seven",
+					"Eight",
+					"Nine",
+					"Ten",
+					"Eleven",
+					"Tweleve",
 					"Random",
                 },
                 DefaultValue = 3,
@@ -333,6 +356,7 @@ local function setBeforeOptions()
 	oceanSizeOption = Map.GetCustomOption(1)
 	waterDepthOption = Map.GetCustomOption(2)
 	continentSizeOption = Map.GetCustomOption(3)
+	-- continentNumberOption = Map.GetCustomOption(3)
 	continentShapeOption = Map.GetCustomOption(4)
 	islandAmountOption = Map.GetCustomOption(5)
 	worldAgeOption = Map.GetCustomOption(6)
@@ -400,6 +424,24 @@ local function setBeforeOptions()
 		cSizeMaxRatio = diceRoll(3, false, 0.3) + 0.1
 		print("random min size ratio: ", cSizeMinRatio, "  random max size ratio: ", cSizeMaxRatio)
 	end
+
+	--[[
+	-- number of major continents
+	if continentNumberOption ~= nil then
+		if continentNumberOption == 1 then
+			pangaea = true
+			ismuthChance = 1.0
+			numberOfMajorContinents = 3
+		elseif continentNumberOption == 13 then
+			numberOfMajorContinents = mRandom(2, 12)
+		else
+			numberOfMajorContinents = continentNumberOption
+		end
+	end
+	local ratioBase = 1 / numberOfMajorContinents
+	cSizeMinRatio = ratioBase * 0.85
+	cSizeMaxRatio = ratioBase * 1.15
+	]]--
 
 	-- continent shape
 	if continentShapeOption == 1 then --extra snakey

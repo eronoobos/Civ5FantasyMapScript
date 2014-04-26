@@ -5,6 +5,12 @@
 -- code change: regionIndex and regionName are now redundant. merge them.
 -- better system for figuring out where deep & shallow areas are for expanding coasts
 
+v19 --> v20
+-- revert to relative continent sizes
+-- use Map.Rand instead of math.random, which should fix multiplayer sync issues
+-- add 1 Billion Years as a World Age option
+-- adjust World Age config
+
 v18 --> v19
 -- allow more than one ally, with probabilities for each and make the appearance of any ally dependent upon latitudes and also on non-latitude tmult. (plains for example have tundra, desert, and grassland)
 -- minor optimizations
