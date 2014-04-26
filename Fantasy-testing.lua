@@ -34,7 +34,7 @@ function GetMapScriptInfo()
 					"Random",
                 },
                 DefaultValue = 5,
-                SortPriority = 1,
+                SortPriority = 2,
             },
 			{
                 Name = "Coast Width",
@@ -45,7 +45,7 @@ function GetMapScriptInfo()
 					"Really Wide",
                 },
                 DefaultValue = 2,
-                SortPriority = 1,
+                SortPriority = 2,
             },
 			{
                 Name = "Continent Size",
@@ -58,7 +58,7 @@ function GetMapScriptInfo()
 					"Random",
                 },
                 DefaultValue = 3,
-                SortPriority = 1,
+                SortPriority = 2,
             },
 			{
                 Name = "Continent Shape",
@@ -72,7 +72,7 @@ function GetMapScriptInfo()
 					"Random",
                 },
                 DefaultValue = 5,
-                SortPriority = 1,
+                SortPriority = 2,
             },
 			{
                 Name = "Island Amount",
@@ -85,7 +85,7 @@ function GetMapScriptInfo()
 					"Random",
                 },
                 DefaultValue = 3,
-                SortPriority = 1,
+                SortPriority = 2,
             },
 			{
                 Name = "World Age",
@@ -112,7 +112,7 @@ function GetMapScriptInfo()
 					"Random",
                 },
                 DefaultValue = 3,
-                SortPriority = 1,
+                SortPriority = 2,
             },
 			{
                 Name = "Latitude-Sensitive Climate",
@@ -121,7 +121,7 @@ function GetMapScriptInfo()
 					"Yes",
                 },
                 DefaultValue = 1,
-                SortPriority = 1,
+                SortPriority = 2,
             },
             {
             	Name = "Mountain Clumpiness",
@@ -133,7 +133,7 @@ function GetMapScriptInfo()
             		"Completely Scattered",
             	},
             	DefaultValue = 2,
-            	SortPriority = 1,
+            	SortPriority = 2,
             },
 			temperature,
 			rainfall,
@@ -144,7 +144,7 @@ end
 
 ----------------------------------------------------------------------------------
 
-local debugEnabled = false
+local debugEnabled = true
 local function EchoDebug(...)
 	if debugEnabled then
 		local printResult = ""
@@ -179,7 +179,12 @@ local function mRandom(lower, upper)
 		divide = true
 		upper = 1000
 	end
-	local number = Map.Rand((upper + 1) - lower, "") + lower
+	local number = 1
+	if upper == lower or lower > upper then
+		number = lower
+	else
+		number = Map.Rand((upper + 1) - lower, "") + lower
+	end
 	if divide then number = number / upper end
 	return number
 end
@@ -211,6 +216,8 @@ local coastRangeRatio = 0.3
 local mountainRatio = 0.15
 local rangeHillRatio = 0.4
 local mountainClumpiness = 0.75
+local cSizeMinRatio = 0.07
+local cSizeMaxRatio = 0.3
 local cSizeMin = 11
 local cSizeMax = 50
 local iceChance = 0.5
@@ -370,28 +377,28 @@ local function setBeforeOptions()
 		coastExpandChance = 1.0
 	end
 
-		-- continent size
+	-- continent size
 	if continentSizeOption == 1 then -- tiny
-		cSizeMin = 11
-		cSizeMax = 50
+		cSizeMinRatio = 0.02
+		cSizeMaxRatio = 0.1
 	elseif continentSizeOption == 2 then -- small
-		cSizeMin = 25
-		cSizeMax = 200
+		cSizeMinRatio = 0.1
+		cSizeMaxRatio = 0.2
 	elseif continentSizeOption == 3 then -- medium
-		cSizeMin = 70
-		cSizeMax = 540
+		cSizeMinRatio = 0.15
+		cSizeMaxRatio = 0.4
 	elseif continentSizeOption == 4 then -- big
-		cSizeMin = 170
-		cSizeMax = 1300
+		cSizeMinRatio = 0.3
+		cSizeMaxRatio = 0.6
 	elseif continentSizeOption == 5 then -- pangaea
 		pangaea = true
-		cSizeMin = 11
-		cSizeMax = 180
+		cSizeMinRatio = 0.05
+		cSizeMaxRatio = 0.5
 		ismuthChance = 1.0
 	elseif continentSizeOption == 6 then -- random
-		cSizeMin = mCeil( ((mRandom() ^ 1.44) * 158) + 12 )
-		cSizeMax = mCeil( cSizeMin * 7.7 )
-		print("random min size: ", cSizeMin, "  random max size: ", cSizeMax)
+		cSizeMinRatio = diceRoll(3, false, 0.18) + 0.02
+		cSizeMaxRatio = diceRoll(3, false, 0.3) + 0.1
+		print("random min size ratio: ", cSizeMinRatio, "  random max size ratio: ", cSizeMaxRatio)
 	end
 
 	-- continent shape
@@ -435,7 +442,7 @@ local function setBeforeOptions()
 		coastRangeRatio = 0.325
 		rangeHillRatio = 0.2
 		hillsness = 0.9
-	if worldAgeOption == 2 then
+	elseif worldAgeOption == 2 then
 		mountainRatio = 0.12
 		coastRangeRatio = 0.3
 		rangeHillRatio = 0.25
@@ -1617,6 +1624,8 @@ end
 local function planContinentSizes()
 -- create idealized list of continent sizes
 -- growContinents() picks from this list at random
+	cSizeMin = cSizeMinRatio * landArea
+	cSizeMax = cSizeMaxRatio * landArea
 	local islandArea = mCeil( islandRatio * landArea )
 	local theory = {}
 	local left = landArea
@@ -2407,8 +2416,11 @@ local function raiseRange(collection, area)
 	end
 	local tilesRaised = 0
 	local mountainTiles = {}
-	repeat
-		local index = tRemove(buffer, mRandom(1, #buffer))
+	while #buffer > 0 and tilesRaised < area do
+		EchoDebug(#buffer)
+		local bi = mRandom(1, #buffer)
+		local index = tRemove(buffer,bi)
+		EchoDebug(bi, index)
 		local plot = Map.GetPlotByIndex(index - 1)
 		if plot ~= nil then
 			if mRandom() < rangeHillRatio then
@@ -2420,7 +2432,7 @@ local function raiseRange(collection, area)
 				tilesRaised = tilesRaised + 1
 			end
 		end
-	until tilesRaised >= area or #buffer == 0
+	end
 	EchoDebug(tilesRaised, "tiles raised of", area)
 	return tilesRaised, mountainTiles
 end
@@ -2662,6 +2674,7 @@ end
 
 
 function GeneratePlotTypes()
+
 
 	setBeforeOptions()
 
