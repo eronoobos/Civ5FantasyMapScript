@@ -57,7 +57,7 @@ function GetMapScriptInfo()
 					"Pangaea",
 					"Random",
                 },
-                DefaultValue = 3,
+                DefaultValue = 4,
                 SortPriority = 2,
             },
             --[[
@@ -421,7 +421,8 @@ local function setBeforeOptions()
 		ismuthChance = 1.0
 	elseif continentSizeOption == 6 then -- random
 		cSizeMinRatio = diceRoll(3, false, 0.18) + 0.02
-		cSizeMaxRatio = diceRoll(3, false, 0.3) + 0.1
+		cSizeMaxRatio = diceRoll(3, false, 0.4-cSizeMinRatio) + cSizeMinRatio
+		if cSizeMinRatio == cSizeMaxRatio then cSizeMaxRatio = cSizeMaxRatio + 0.01 end
 		print("random min size ratio: ", cSizeMinRatio, "  random max size ratio: ", cSizeMaxRatio)
 	end
 
