@@ -14,159 +14,9 @@ include("FractalWorld")
 include("FeatureGenerator")
 include("TerrainGenerator")
 
-function GetMapScriptInfo()
-	local world_age, temperature, rainfall, sea_level, resources = GetCoreMapOptions()
-	return {
-		Name = "Fantasy testing",
-		Description = "A map of distinct regions.",
-		IconIndex = 5,
-		CustomOptions = {
-			{
-                Name = "Ocean Size",
-                Values = {
-					"Channels",
-                    "Navegable Channels",
-                    "Mostly Land",
-					"Half Land",
-					"Earth",
-					"Waterworld",
-					"The Great Flood",
-					"Random",
-                },
-                DefaultValue = 5,
-                SortPriority = 2,
-            },
-			{
-                Name = "Coast Width",
-                Values = {
-                    "Thin",
-                    "Normal",
-					"Wide",
-					"Really Wide",
-                },
-                DefaultValue = 2,
-                SortPriority = 2,
-            },
-			{
-                Name = "Continent Size",
-                Values = {
-					"Tiny",
-					"Small",
-					"Medium",
-					"Big",
-					"Pangaea",
-					"Random",
-                },
-                DefaultValue = 4,
-                SortPriority = 2,
-            },
-            --[[
-            {
-                Name = "Number of Major Continents",
-                Values = {
-					"Pangaea",
-					"One",
-					"Two",
-					"Three",
-					"Four",
-					"Five",
-					"Six",
-					"Seven",
-					"Eight",
-					"Nine",
-					"Ten",
-					"Eleven",
-					"Tweleve",
-					"Random",
-                },
-                DefaultValue = 3,
-                SortPriority = 2,
-            },
-            ]]--
-			{
-                Name = "Continent Shape",
-                Values = {
-					"Extra Snakey",
-					"Snakey",
-					"Normal",
-					"Blobby",
-                    "Extra Blobby",
-					"Random",
-                },
-                DefaultValue = 4,
-                SortPriority = 2,
-            },
-			{
-                Name = "Island Amount",
-                Values = {
-					"None",
-					"Few",
-					"Some",
-					"Lots",
-					"Tons",
-					"Random",
-                },
-                DefaultValue = 3,
-                SortPriority = 2,
-            },
-			{
-                Name = "World Age",
-                Values = {
-                	"1 Billion Years",
-                    "2 Billion Years",
-                    "3 Billion Years",
-					"4 Billion Years",
-					"5 Billion Years",
-					"6 Billion Years",
-					"Random",
-                },
-                DefaultValue = 4,
-                SortPriority = 1,
-            },
-			{
-                Name = "Region Size",
-                Values = {
-					"Tiny",
-					"Small",
-					"Medium",
-					"Big",
-                    "Ginormous",
-					"Random",
-                },
-                DefaultValue = 3,
-                SortPriority = 2,
-            },
-			{
-                Name = "Latitude-Sensitive Climate",
-                Values = {
-					"No",
-					"Yes",
-                },
-                DefaultValue = 1,
-                SortPriority = 2,
-            },
-            {
-            	Name = "Mountain Clumpiness",
-            	Values = {
-            		"Epic Clumps",
-            		"Normal",
-            		"Scattered",
-            		"Very Scattered",
-            		"Completely Scattered",
-            	},
-            	DefaultValue = 2,
-            	SortPriority = 2,
-            },
-			temperature,
-			rainfall,
-			resources
-		},
-	};
-end
-
 ----------------------------------------------------------------------------------
 
-local debugEnabled = true
+local debugEnabled = false
 local function EchoDebug(...)
 	if debugEnabled then
 		local printResult = ""
@@ -233,6 +83,7 @@ local paintedRatio = 0.6
 local regionPaintedRatio = 0.75
 local breakAtPoles = true
 local evadePoles = true
+local xWrap = true
 local keepItInside = true
 local coastRangeRatio = 0.3
 local mountainRatio = 0.15
@@ -360,7 +211,8 @@ local function setBeforeOptions()
 	islandAmountOption = Map.GetCustomOption(5)
 	worldAgeOption = Map.GetCustomOption(6)
 	regionSizeOption = Map.GetCustomOption(7)
-	latitudeSensitiveOption = Map.GetCustomOption(8)
+	-- latitudeSensitiveOption = Map.GetCustomOption(8)
+	mapTypeOption = Map.GetCustomOption(8)
 	mountainClumpinessOption = Map.GetCustomOption(9)
 	temperatureOption = Map.GetCustomOption(10)
 	rainfallOption = Map.GetCustomOption(11)
@@ -387,18 +239,24 @@ local function setBeforeOptions()
 
 	-- water depth
 	if waterDepthOption == 1 then
-		coastRecedeChance = 1.0
-		coastExpandChance = 0.0
+		-- coastRecedeChance = 1.0
+		-- coastExpandChance = 0.0
+		coastExpansionDice = {}
 	elseif waterDepthOption == 2 then
 		coastRecedeChance = 0.0
 		coastExpandChance = 0.0
+		-- coastExpansionDice = {4, 4}
 	elseif waterDepthOption == 3 then
 		coastRecedeChance = 0.0
 		coastExpandChance = 0.15
+		-- coastExpansionDice = {3, 4, 5}
 	elseif waterDepthOption == 4 then
 		coastRecedeChance = 0.67
 		coastExpandChance = 1.0
+		-- coastExpansionDice = {2, 3, 4, 5}
 	end
+	-- coastRecedeChance = 0.0
+	-- coastExpandChance = 0.0
 
 	-- continent size
 	if continentSizeOption == 1 then -- tiny
@@ -540,6 +398,7 @@ local function setBeforeOptions()
 		print("random region min size: ", regionMinSize, "  random region max size: ", regionMaxSize)
 	end
 
+	--[[
 	-- latitude-based climate
 	if latitudeSensitiveOption == 1 then
 		useLatitude = false
@@ -547,6 +406,33 @@ local function setBeforeOptions()
 		useLatitude = true
 		polarIce = true
 		evadePoles = false
+	end
+	]]--
+
+	-- map type
+	if mapTypeOption == 1 then -- world
+		useLatitude = false
+		evadePoles = true
+		breakAtPoles = true
+		polarIce = false
+		xWrap = true
+	elseif mapTypeOption == 2 then -- realistic world
+		useLatitude = true
+		evadePoles = false
+		breakAtPoles = true
+		polarIce = true
+		xWrap = true
+	elseif mapTypeOption == 3 then -- territory
+		useLatitude = false
+		evadePoles = false
+		breakAtPoles = false
+		polarIce = false
+		xWrap = false
+		pangaea = true
+		cSizeMinRatio = 0.4
+		cSizeMaxRatio = 0.6
+		ismuthChance = 1.0
+		-- landRatio = 0.85
 	end
 
 	--temperature
@@ -594,7 +480,7 @@ end
 local function setAfterOptions()
 
 	-- ocean size and latitude-based climate
-	if oceanSizeOption == 1 or latitudeSensitiveOption == 2 then
+	if oceanSizeOption == 1 or mapTypeOption ~= 1 then
 		southPole = -1
 		northPole = yMax
 		evadePoles = false
@@ -602,9 +488,9 @@ local function setAfterOptions()
 
 	--expand pangaea "continent size maximum" to half of land area
 	-- and half the number of islands
-	if continentSizeOption == 5 then
+	if continentSizeOption == 5 or mapTypeOption == 3 then
 		islandRatio = islandRatio / 2
-		cSizeMax = mCeil( (landArea * (1 - islandRatio)) / 2 )
+
 	end
 
 end
@@ -1298,14 +1184,18 @@ local function directionalTransform(direction, x, y)
 		nx = x - 1 + odd
 		ny = y - 1
 	end
-	if nx > xMax then nx = 0 elseif nx < 0 then nx = xMax end
+	if xWrap then
+		if nx > xMax then nx = 0 elseif nx < 0 then nx = xMax end
+	else
+		if nx > xMax then nx = xMax elseif nx < 0 then nx = 0 end
+	end
 	if ny > yMax then
 		ny = yMax
-		direction = 5
+		if evadePoles then direction = 5 end
 	end
 	if ny < 0 then
 		ny = 0
-		direction = 3
+		if evadePoles then direction = 3 end
 	end
 	return nx, ny, direction
 end
@@ -2682,6 +2572,68 @@ local function popCoasts()
 	until #oBuffer <= 1
 end
 
+local function GenerateFantasyCoasts()
+	print("setting initial coasts and oceans (Fantasy)...")
+	local shallowWater = GameDefines.SHALLOW_WATER_TERRAIN
+	local deepWater = GameDefines.DEEP_WATER_TERRAIN
+	local deeps = {}
+	local isNotFlat = {}
+	for i, index in pairs(stillOcean) do
+		local plot = Map.GetPlotByIndex(index - 1)
+		if plot:IsWater() then
+			local x, y = getXY(index)
+			local hasland = false
+			for d = 1, 6 do
+				local nx, ny = directionalTransform(d, x, y)
+				local nindex = getIndex(nx, ny)
+				local nplot = Map.GetPlotByIndex(nindex - 1)
+				if nplot ~= nil then
+					if not nplot:IsWater() then
+						hasland = true
+						break
+					end
+				end
+			end
+			if hasland then
+				plot:SetTerrainType(shallowWater, false, false)
+			else
+				plot:SetTerrainType(deepWater, false, false)
+				table.insert(deeps, index)
+			end
+		end
+	end
+
+	local expansion_diceroll_table = coastExpansionDice or {4, 4}
+
+	for loop, iExpansionDiceroll in ipairs(expansion_diceroll_table) do
+		local makeShallow = {}
+		for i, index in pairs(deeps) do
+			local plot = Map.GetPlotByIndex(index - 1)
+			if plot:GetTerrainType() == deepWater then
+				local x, y = getXY(index)
+				local hasshallow = false
+				for d = 1, 6 do
+					local nx, ny = directionalTransform(d, x, y)
+					local nindex = getIndex(nx, ny)
+					local nplot = Map.GetPlotByIndex(nindex - 1)
+					if nplot ~= nil then
+						if nplot:GetTerrainType() == shallowWater then
+							hasshallow = true
+							break
+						end
+					end
+				end
+				if hasshallow and Map.Rand(iExpansionDiceroll, "add shallows") == 0 then
+					table.insert(makeShallow, plot);
+				end
+			end
+		end
+		for i, plot in ipairs(makeShallow) do
+			plot:SetTerrainType(shallowWater, false, false)
+		end
+	end
+end
+
 local function countBegin()
 	beginTime = os.time()
 end
@@ -2710,11 +2662,200 @@ local function CountMountains()
 	print(mcount, " mountains ", hcount, " hills ", land, " land ", mpercent, "% mountians", hpercent, "% hills")
 end
 
-----
+
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+
+function GetMapScriptInfo()
+	local world_age, temperature, rainfall, sea_level, resources = GetCoreMapOptions()
+	return {
+		Name = "Fantasy testing",
+		Description = "A map of distinct regions.",
+		IconIndex = 5,
+		CustomOptions = {
+			{
+                Name = "Ocean Size",
+                Values = {
+					"Channels",
+                    "Navegable Channels",
+                    "Mostly Land",
+					"Half Land",
+					"Earth",
+					"Earthsea",
+					"The Great Flood",
+					"Random",
+                },
+                DefaultValue = 5,
+                SortPriority = 2,
+            },
+			{
+                Name = "Coast Width",
+                Values = {
+                    "Thin",
+                    "Normal",
+					"Wide",
+					"Really Wide",
+                },
+                DefaultValue = 2,
+                SortPriority = 2,
+            },
+			{
+                Name = "Continent Size",
+                Values = {
+					"Tiny",
+					"Small",
+					"Medium",
+					"Big",
+					"Pangaea",
+					"Random",
+                },
+                DefaultValue = 4,
+                SortPriority = 2,
+            },
+            --[[
+            {
+                Name = "Number of Major Continents",
+                Values = {
+					"Pangaea",
+					"One",
+					"Two",
+					"Three",
+					"Four",
+					"Five",
+					"Six",
+					"Seven",
+					"Eight",
+					"Nine",
+					"Ten",
+					"Eleven",
+					"Tweleve",
+					"Random",
+                },
+                DefaultValue = 3,
+                SortPriority = 2,
+            },
+            ]]--
+			{
+                Name = "Continent Shape",
+                Values = {
+					"Extra Snakey",
+					"Snakey",
+					"Normal",
+					"Blobby",
+                    "Extra Blobby",
+					"Random",
+                },
+                DefaultValue = 4,
+                SortPriority = 2,
+            },
+			{
+                Name = "Island Amount",
+                Values = {
+					"None",
+					"Few",
+					"Some",
+					"Lots",
+					"Tons",
+					"Random",
+                },
+                DefaultValue = 3,
+                SortPriority = 2,
+            },
+			{
+                Name = "World Age",
+                Values = {
+                	"1 Billion Years",
+                    "2 Billion Years",
+                    "3 Billion Years",
+					"4 Billion Years",
+					"5 Billion Years",
+					"6 Billion Years",
+					"Random",
+                },
+                DefaultValue = 4,
+                SortPriority = 1,
+            },
+			{
+                Name = "Region Size",
+                Values = {
+					"Tiny",
+					"Small",
+					"Medium",
+					"Big",
+                    "Ginormous",
+					"Random",
+                },
+                DefaultValue = 3,
+                SortPriority = 2,
+            },
+            --[[
+			{
+                Name = "Latitude-Sensitive Climate",
+                Values = {
+					"No",
+					"Yes",
+                },
+                DefaultValue = 1,
+                SortPriority = 2,
+            },
+            ]]--
+            {
+                Name = "Map Type",
+                Values = {
+					"World",
+					"Realistic World",
+					"Territory",
+                },
+                DefaultValue = 1,
+                SortPriority = 1,
+            },
+            {
+            	Name = "Mountain Clumpiness",
+            	Values = {
+            		"Epic Clumps",
+            		"Normal",
+            		"Scattered",
+            		"Very Scattered",
+            		"Completely Scattered",
+            	},
+            	DefaultValue = 2,
+            	SortPriority = 2,
+            },
+			temperature,
+			rainfall,
+			resources
+		},
+	};
+end
+
+
+function GetMapInitData(worldSize)
+	print("HELLO")
+	if Map.GetCustomOption(8) == 3 then
+		local worldsizes = {
+			[GameInfo.Worlds.WORLDSIZE_DUEL.ID] = {18, 14},
+			[GameInfo.Worlds.WORLDSIZE_TINY.ID] = {28, 22},
+			[GameInfo.Worlds.WORLDSIZE_SMALL.ID] = {36, 26},
+			[GameInfo.Worlds.WORLDSIZE_STANDARD.ID] = {44, 32},
+			[GameInfo.Worlds.WORLDSIZE_LARGE.ID] = {56, 44},
+			[GameInfo.Worlds.WORLDSIZE_HUGE.ID] = {72, 56}
+			}
+		local grid_size = worldsizes[worldSize];
+		local world = GameInfo.Worlds[worldSize];
+		if world ~= nil then
+			return {
+				Width = grid_size[1],
+				Height = grid_size[2],
+				WrapX = false,
+			};      
+	    end
+	end
+
+end
 
 
 function GeneratePlotTypes()
-
 
 	setBeforeOptions()
 
@@ -2801,8 +2942,10 @@ function GeneratePlotTypes()
 
 	if debugEnabled then CountMountains() end
 
+	print(Map.IsWrapX(), Map.IsWrapY())
+
 	local args = { bExpandCoasts = false }
-	GenerateCoasts(args)
+	GenerateFantasyCoasts()
 
 end
 
@@ -2846,6 +2989,34 @@ function GenerateTerrain()
 
 --	SetTerrainTypes(terrainTypes);
 
+end
+
+function AddLakes()
+	print("Adding Lakes (Fantasy)");
+	
+	local numLakesAdded = 0;
+	local lakePlotRand = GameDefines.LAKE_PLOT_RAND;
+	lakePlotRand = lakePlotRand + (lakePlotRand * ismuthChance)
+	for i, plot in Plots() do
+		if not plot:IsWater() then
+			if not plot:IsCoastalLand() then
+				if not plot:IsRiver() then
+					local r = Map.Rand(lakePlotRand, "MapGenerator AddLakes");
+					if r == 0 then
+						plot:SetArea(-1);
+						plot:SetPlotType(PlotTypes.PLOT_OCEAN);
+						numLakesAdded = numLakesAdded + 1;
+					end
+				end
+			end
+		end
+	end
+	
+	-- this is a minimalist update because lakes have been added
+	if numLakesAdded > 0 then
+		print(tostring(numLakesAdded).." lakes added")
+		Map.CalculateAreas();
+	end
 end
 
 ----------------------------------------------------------------------------------
