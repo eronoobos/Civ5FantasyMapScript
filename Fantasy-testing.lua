@@ -90,6 +90,7 @@ function GetMapScriptInfo()
 			{
                 Name = "World Age",
                 Values = {
+                	"1 Billion Years",
                     "2 Billion Years",
                     "3 Billion Years",
 					"4 Billion Years",
@@ -97,7 +98,7 @@ function GetMapScriptInfo()
 					"6 Billion Years",
 					"Random",
                 },
-                DefaultValue = 3,
+                DefaultValue = 4,
                 SortPriority = 1,
             },
 			{
@@ -143,6 +144,19 @@ end
 
 ----------------------------------------------------------------------------------
 
+local debugEnabled = false
+local function EchoDebug(...)
+	if debugEnabled then
+		local printResult = ""
+		for i,v in ipairs(arg) do
+			printResult = printResult .. tostring(v) .. "\t"
+		end
+		print(printResult)
+	end
+end
+
+----------------------------------------------------------------------------------
+
 local oceanSizeOption
 local waterDepthOption
 local continentSizeOption
@@ -157,7 +171,18 @@ local rainfallOption
 
 ----------------------------------------------------------------------------------
 
-local mRandom = math.random
+-- local mRandom = math.random
+local function mRandom(lower, upper)
+	local divide = false
+	if lower == nil then lower = 0 end
+	if upper == nil then
+		divide = true
+		upper = 1000
+	end
+	local number = Map.Rand((upper + 1) - lower, "") + lower
+	if divide then number = number / upper end
+	return number
+end
 local mCeil = math.ceil
 local mFloor = math.floor
 local mMin = math.min
@@ -407,36 +432,42 @@ local function setBeforeOptions()
 	-- world age
 	if worldAgeOption == 1 then
 		mountainRatio = 0.25
-		coastRangeRatio = 0.35
-		rangeHillRatio = 0.25
+		coastRangeRatio = 0.325
+		rangeHillRatio = 0.2
 		hillsness = 0.9
-	elseif worldAgeOption == 2 then
-		mountainRatio = 0.1
+	if worldAgeOption == 2 then
+		mountainRatio = 0.12
 		coastRangeRatio = 0.3
-		rangeHillRatio = 0.3
-		hillsness = 0.75
+		rangeHillRatio = 0.25
+		hillsness = 0.8
 	elseif worldAgeOption == 3 then
+		mountainRatio = 0.06
+		coastRangeRatio = 0.275
+		rangeHillRatio = 0.3
+		hillsness = 0.7
+	elseif worldAgeOption == 4 then
 		mountainRatio = 0.03
 		coastRangeRatio = 0.25
 		rangeHillRatio = 0.35
 		hillsness = 0.6
-	elseif worldAgeOption == 4 then
-		mountainRatio = 0.015
+	elseif worldAgeOption == 5 then
+		mountainRatio = 0.02
 		coastRangeRatio = 0.2
 		skinnyMountainRanges = true
 		rangeHillRatio = 0.4
-		hillsness = 0.5
-	elseif worldAgeOption == 5 then
+		hillsness = 0.4
+	elseif worldAgeOption == 6 then
 		mountainRatio = 0.0
 		levelMountains = 1.0
 		hillsness = 0.25
-	elseif worldAgeOption == 6 then
+	elseif worldAgeOption == 7 then
 		local mountainsFrodoMountains = mRandom()
 		print("random mountainousness, 0 to 100: ", mFloor(mountainsFrodoMountains * 100))
 		mountainRatio = (mountainsFrodoMountains ^ 3.05) * 0.25
-		coastRangeRatio = (mountainsFrodoMountains * 0.2) + 0.15
+		coastRangeRatio = (mountainsFrodoMountains * 0.1) + 0.2
 		rangeHillRatio = ((1 - mountainsFrodoMountains) * 0.2) + 0.2
 		hillsness = (mountainsFrodoMountains * 0.65) + 0.25
+		print("mountainRatio:", mountainRatio, "coastRangeRatio:", coastRangeRatio, "rangeHillRatio:", rangeHillRatio, "hillsness:", hillsness)
 	end
 
 	--region size
@@ -498,18 +529,16 @@ local function setBeforeOptions()
 	end
 
 	--mountain clumpiness
-	if mountainClumpinessOption ~= nil then
-		if mountainClumpinessOption == 1 then
-			mountainClumpiness = 1.0
-		elseif mountainClumpinessOption == 2 then
-			mountainClumpiness = 0.75
-		elseif mountainClumpinessOption == 3 then
-			mountainClumpiness = 0.5
-		elseif mountainClumpinessOption == 4 then
-			mountainClumpiness = 0.25
-		elseif mountainClumpinessOption == 5 then
-			mountainClumpiness = 0.0
-		end
+	if mountainClumpinessOption == 1 then
+		mountainClumpiness = 1.0
+	elseif mountainClumpinessOption == 2 then
+		mountainClumpiness = 0.75
+	elseif mountainClumpinessOption == 3 then
+		mountainClumpiness = 0.5
+	elseif mountainClumpinessOption == 4 then
+		mountainClumpiness = 0.25
+	elseif mountainClumpinessOption == 5 then
+		mountainClumpiness = 0.0
 	end
 
 end
@@ -972,7 +1001,7 @@ local function generateRegionType(latitude)
 --			print(terrainType)
 		else
 			-- if no listed terrains are allowed at this latitude, find the closest one
-			print("using terrain closest to latitude", latitude)
+			EchoDebug("using terrain closest to latitude", latitude)
 			local maxdist = -1
 			local maxtt
 			for tt, tudes in pairs(terrainLatitudes) do
@@ -1592,7 +1621,7 @@ local function planContinentSizes()
 	local theory = {}
 	local left = landArea
 	local cleft = landArea - islandArea
-	print(cleft, islandArea)
+	EchoDebug(cleft, islandArea)
 	local i = 1
 	repeat
 		local size = 0
@@ -1606,7 +1635,7 @@ local function planContinentSizes()
 		theory[i] = size
 		left = left - size
 		cleft = cleft - size
-		print(i, size, left)
+		EchoDebug(i, size, left)
 		i = i + 1
 	until left <= 0
 	return theory
@@ -1640,13 +1669,13 @@ local function growContinents()
 	local blockedTileCount = 0
 	repeat
 		local left = landArea - continentalTotalTiles
-		print("land area left to fill", left)
+		EchoDebug("land area left to fill", left)
 		local continentSize = left
 		if #cSizeTheory > 0 then
 			local csti = mRandom(1,#cSizeTheory)
 			continentSize = cSizeTheory[csti]
 		else
-			print("end of continent size plans")
+			EchoDebug("end of continent size plans")
 		end
 
 		local noBlockingChance = (blockedTileCount / oceanArea) / 2
@@ -1657,7 +1686,7 @@ local function growContinents()
 		if paintedSize == 0 then paintedSize = 1 end
 		local expandedSize = continentSize - paintedSize
 --		print("land area remaining", landArea - continentalTotalTiles)
-		print("new continent", continentIndex, continentSize, paintedSize, expandedSize, noBlockingChance)
+		EchoDebug("new continent", continentIndex, continentSize, paintedSize, expandedSize, noBlockingChance)
 
 
 		local tileIndex
@@ -1677,7 +1706,7 @@ local function growContinents()
 		if tileIndex == nil then break end
 		local x, y = getXY(tileIndex)
 		if x == -1 and y == -1 then
-			print("no empty spot found for continent")
+			EchoDebug("no empty spot found for continent")
 			break
 		else
 			if pangaea == true and (continentSize > islandSizeMax or #cSizeTheory == 0) then
@@ -1688,16 +1717,16 @@ local function growContinents()
 
 		-- painting and expanding continent (expansion only if any tiles were painted at all)
 		local actualContinentSize = 0
-		print("isolated?", isolateContinent)
+		EchoDebug("isolated?", isolateContinent)
 		local tiles = paintContinent(x, y, continentIndex, paintedSize, isolateContinent)
 		continentalTotalTiles = continentalTotalTiles + #tiles
-		print("tiles painted", #tiles)
+		EchoDebug("tiles painted", #tiles)
 		actualContinentSize = actualContinentSize + #tiles
 		local expandedTiles = {}
 		if #tiles > 0 then
 			expandedTiles = expandContinent(tiles, continentIndex, expandedSize, nil, isolateContinent)
 			continentalTotalTiles = continentalTotalTiles + #expandedTiles
-			print("tiles expanded", #expandedTiles)
+			EchoDebug("tiles expanded", #expandedTiles)
 			actualContinentSize = actualContinentSize + #expandedTiles
 		end
 		if actualContinentSize > biggestContinentSize then biggestContinentSize = actualContinentSize end
@@ -1705,7 +1734,7 @@ local function growContinents()
 		-- finding the closest match in the continent size list and removing it
 		if actualContinentSize > 0 and #cSizeTheory > 0 then
 			local closest = findClosest(actualContinentSize, cSizeTheory)
-			print("actual size", actualContinentSize, "  closest match", cSizeTheory[closest])
+			EchoDebug("actual size", actualContinentSize, "  closest match", cSizeTheory[closest])
 			tRemove(cSizeTheory, closest)
 		end
 
@@ -1790,7 +1819,7 @@ local function growContinents()
 				tRemove(coastBuffer, i)
 			until #coastBuffer <= 2 or maxCoastLevel >= coastLevelLimit or #addCoast >= blockedAreaLimit
 
-			print ("tiles blocked", #addCoast)
+			EchoDebug("tiles blocked", #addCoast)
 			if #addCoast > 0 then
 --				print("ocean!")
 				repeat
@@ -1805,7 +1834,7 @@ local function growContinents()
 				addedCoast = {}
 			end
 		else
-			print("tiles blocked", 0)
+			EchoDebug("tiles blocked", 0)
 		end
 
 		-- do the same for quandrant tile lists
@@ -1823,7 +1852,7 @@ local function growContinents()
 		end
 		lastContinentalTotalTiles = continentalTotalTiles
 	until continentalTotalTiles >= landArea or continentIndex > 512 or sameAreaLeft > 9 or #soQuad[1] + #soQuad[2] + #soQuad[3] + #soQuad[4] < 24
-	print (continentalTotalTiles, continentIndex, sameAreaLeft, #soQuad[1], #soQuad[2], #soQuad[3], #soQuad[4], blockedTileCount)
+	EchoDebug(continentalTotalTiles, continentIndex, sameAreaLeft, #soQuad[1], #soQuad[2], #soQuad[3], #soQuad[4], blockedTileCount)
 end
 
 
@@ -2025,7 +2054,7 @@ end
 local function growRegions()
 
 	-- restrict region size to biggest continent
-	print("biggest continent size", biggestContinentSize)
+	EchoDebug("biggest continent size", biggestContinentSize)
 	local halfBiggestContinentSize = mCeil(biggestContinentSize / 2)
 	if regionMaxSize > biggestContinentSize then
 		print ("region maximum size", regionMaxSize, "reduced to", biggestContinentSize)
@@ -2037,7 +2066,7 @@ local function growRegions()
 	end
 	regionAvgSize = (regionMinSize + regionMaxSize) / 2
 	maxRegions = mFloor( (4 * landArea) / regionAvgSize )
-	print("maximum regions", maxRegions)
+	EchoDebug("maximum regions", maxRegions)
 
 	-- gather available tiles to fill with regions
 	for nothing, xy in pairs(continentalXY) do
@@ -2065,7 +2094,7 @@ local function growRegions()
 		if useLatitude == true then
 			local plot = Map.GetPlotByIndex(index - 1)
 			if plot ~= nil then latitude = plot:GetLatitude() end
-			print(latitude)
+			EchoDebug(latitude)
 		end
 		regionName = regionIterations
 		repeat
@@ -2078,7 +2107,7 @@ local function growRegions()
 		local regionPaintedSize = mFloor(regionSize * region.paintedRatio)
 		local regionExpandedSize = regionSize - regionPaintedSize
 		local tiles = paintRegion(x, y, regionIterations, regionName, regionPaintedSize)
-		print(#tiles, "tiles painted")
+		EchoDebug(#tiles, "tiles painted")
 		if #tiles > 0 then
 			tilesByRegion[regionIterations] = {}
 			for nothing,tindex in pairs(tiles) do
@@ -2087,7 +2116,7 @@ local function growRegions()
 		end
 		filledTiles = filledTiles + #tiles
 		local expandedTiles = expandRegion(tiles, regionIterations, regionName, regionExpandedSize, maxIterations)
-		print(#expandedTiles, "tiles expanded")
+		EchoDebug(#expandedTiles, "tiles expanded")
 		if #expandedTiles > 0 then
 			if tilesByRegion[regionIterations] == nil then tilesByRegion[regionIndex] = {} end
 			for nothing,tindex in pairs(expandedTiles) do
@@ -2099,7 +2128,7 @@ local function growRegions()
 		-- check if number of terrain tiles has exceeded maximum, and remove from possible region terrains if so
 		for terrainType, count in pairs(terrainFilledTiles) do
 			if tmult[terrainType] > 0 and count > terrainMaxArea[terrainType] then
-				print(terrainType, "count", count, "above maximum", terrainMaxArea[terrainType], "removing from list of terrains")
+				EchoDebug(terrainType, "count", count, "above maximum", terrainMaxArea[terrainType], "removing from list of terrains")
 				tmult[terrainType] = 0
 				for i, tt in pairs(terrains) do
 					if tt == terrainType then
@@ -2113,9 +2142,9 @@ local function growRegions()
 		for ai, index in pairs(availableIndices) do
 			if tileTiles[index] ~= nil then tRemove(availableIndices, ai) end
 		end
-		print(#availableIndices, "available tiles left")
+		EchoDebug(#availableIndices, "available tiles left")
 		regions[regionIterations] = { regionName = regionName, size = #tiles + #expandedTiles }
-		print ("region number", regionIterations, "done")
+		EchoDebug("region number", regionIterations, "done")
 		if filledTiles == 0 and lastFilledtiles == 0 then
 			sameAreaLeft = sameAreaLeft + 1
 		else
@@ -2321,7 +2350,7 @@ local function collectRange(range, totalArea, perscribedArea)
 	else
 		area = totalArea - (areaDifference * mountainClumpiness)
 	end
-	print(totalArea, perscribedArea, areaDifference, area)
+	EchoDebug(totalArea, perscribedArea, areaDifference, area)
 	if area == 0 then return {} end
 	local rangeBuffer = {}
 	for rangeIndex, localRange in pairs(range) do
@@ -2366,7 +2395,7 @@ local function collectRange(range, totalArea, perscribedArea)
 		end
 		tRemove(rangeBuffer, bufferIndex)
 	until tilesCollected >= area or #rangeBuffer == 0
-	print(tilesCollected, "tiles collected of", totalArea)
+	EchoDebug(tilesCollected, "tiles collected of", totalArea)
 	return collection
 end
 
@@ -2392,7 +2421,7 @@ local function raiseRange(collection, area)
 			end
 		end
 	until tilesRaised >= area or #buffer == 0
-	print(tilesRaised, "tiles raised of", area)
+	EchoDebug(tilesRaised, "tiles raised of", area)
 	return tilesRaised, mountainTiles
 end
 
@@ -2437,7 +2466,7 @@ local function expandMountains(tilesRaised, area, mountainTiles)
 			until #dirs == 0 or tilesRaised >= area
 			tRemove(mountainBuffer, bufferIndex)
 		until tilesRaised >= area or noChange > 36 or #mountainBuffer == 0
-		print(tilesRaised, "tiles raised of", area, "(after expansion)")
+		EchoDebug(tilesRaised, "tiles raised of", area, "(after expansion)")
 	end
 	return tilesRaised
 end
@@ -2610,6 +2639,25 @@ local function countEnd()
 	print(elapsed, " seconds elapsed")
 end
 
+local function CountMountains()
+	local iW, iH = Map.GetGridSize()
+	local mapArea = (iW) * (iH)
+	local mcount = 0
+	local ocount = 0
+	local hcount = 0
+	for index = 1, mapArea do
+		local plot = Map.GetPlotByIndex(index - 1)
+		local ptype = plot:GetPlotType()
+		if ptype == PlotTypes.PLOT_MOUNTAIN then mcount = mcount + 1 end
+		if ptype == PlotTypes.PLOT_OCEAN then ocount = ocount + 1 end
+		if ptype == PlotTypes.PLOT_HILLS then hcount = hcount + 1 end
+	end
+	local land = mapArea - ocount
+	local mpercent = (mcount / land) * 100
+	local hpercent = (hcount / land) * 100
+	print(mcount, " mountains ", hcount, " hills ", land, " land ", mpercent, "% mountians", hpercent, "% hills")
+end
+
 ----
 
 
@@ -2692,11 +2740,13 @@ function GeneratePlotTypes()
 		if rTilesRaised == nil then rTilesRaised = 0 end
 		if rTilesRaised < regionRangeArea then
 			coastRangeArea = coastRangeArea + (regionRangeArea - rTilesRaised)
-			print("only", rTilesRaised, "region range raised out of", regionRangeArea, "coast range increased by", regionRangeArea - rTilesRaised, "to", coastRangeArea)
+			EchoDebug("only", rTilesRaised, "region range raised out of", regionRangeArea, "coast range increased by", regionRangeArea - rTilesRaised, "to", coastRangeArea)
 		end
 		print("coast range:")
 		local cTilesRaised = doRange(coastRange, coastRangeTileCount, coastRangeArea)
 	end
+
+	if debugEnabled then CountMountains() end
 
 	local args = { bExpandCoasts = false }
 	GenerateCoasts(args)
