@@ -47,7 +47,6 @@ function GetMapScriptInfo()
                 DefaultValue = 2,
                 SortPriority = 2,
             },
-            --[[
 			{
                 Name = "Continent Size",
                 Values = {
@@ -61,7 +60,7 @@ function GetMapScriptInfo()
                 DefaultValue = 3,
                 SortPriority = 2,
             },
-            ]]--
+            --[[
             {
                 Name = "Number of Major Continents",
                 Values = {
@@ -83,6 +82,7 @@ function GetMapScriptInfo()
                 DefaultValue = 3,
                 SortPriority = 2,
             },
+            ]]--
 			{
                 Name = "Continent Shape",
                 Values = {
