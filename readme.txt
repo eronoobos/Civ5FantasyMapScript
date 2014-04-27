@@ -12,6 +12,8 @@ v19 --> v20
 -- add option to create non-wrapping map ("territory")
 -- nearly copy civ 5's native coast generator, to prevent wrapping coast tiles on nonwrapping maps
 -- increase lake chance when pangaea is active (because of ismuthchance)
+-- randomize (and reduce) polar ice slightly
+-- add "realistic realm" map option with randomized latitude range
 
 v18 --> v19
 -- allow more than one ally, with probabilities for each and make the appearance of any ally dependent upon latitudes and also on non-latitude tmult. (plains for example have tundra, desert, and grassland)

@@ -902,7 +902,7 @@ local function generateRegionType(latitude)
 				for m = 1, mult do
 					tInsert(terrainsHere, tt)
 				end
-				print(tt, mult)
+				EchoDebug(tt, mult)
 			end
 		end
 		if #terrainsHere > 0 then
@@ -2446,7 +2446,7 @@ local function popCoasts()
 		local plot = Map.GetPlotByIndex(index - 1)
 		local thisIceChance = iceChance
 		if plot ~= nil then
-			if useLatitude == true then
+			if useLatitude and polarIce then
 				local latitude = GetFantasyLatitude(plot)
 				local m = (latitude ^ 2) / 8100
 				thisIceChance = iceChance * m
@@ -2966,9 +2966,9 @@ function GenerateTerrain()
 			plot:SetTerrainType(tile.terrainType, false, false)
 			if useLatitude == true then
 				local x, y = getXY(index)
-				if y == yMax - 1 or y == 0 then
+				if (xWrap and (y == northPole - 1 or y == southPole + 1)) or (not xWrap and GetFantasyLatitude(plot) > 85) then
 					plot:SetTerrainType(terrainSnow, false, false)
-				elseif y == yMax - 2 or y == 1 then
+				elseif (xWrap and (y == northPole - 2 or y == southPole + 2)) or (not xWrap and GetFantasyLatitude(plot) > 80) then
 					if tile.terrainType ~= terrainSnow then
 						plot:SetTerrainType(terrainTundra, false, false)
 					end
@@ -3048,10 +3048,10 @@ function AddFeatures()
 				plot:SetFeatureType(feature)
 			end
 		end
-		if useLatitude == true then
+		if useLatitude and polarIce then
 			local x, y = getXY(index)
-			if y == yMax - 1 or y == 0 then
-				if plot:CanHaveFeature(FeatureTypes.FEATURE_ICE) then
+			if (xWrap and (y == northPole - 1 or y == southPole + 1)) or (not xWrap and GetFantasyLatitude(plot) > 85) then
+				if plot:CanHaveFeature(FeatureTypes.FEATURE_ICE) and Map.Rand(5, "polar ice chance") ~= 0 then
 					plot:SetFeatureType(FeatureTypes.FEATURE_ICE)
 					popIce(index, true)
 					for d = 1, 6 do
