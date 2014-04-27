@@ -10,9 +10,6 @@ end
 
 include("math")
 include("MapGenerator")
-include("FractalWorld")
-include("FeatureGenerator")
-include("TerrainGenerator")
 
 ----------------------------------------------------------------------------------
 
@@ -2673,13 +2670,13 @@ function GetMapScriptInfo()
 			{
                 Name = "Ocean Size",
                 Values = {
-					"Channels",
-                    "Navegable Channels",
+					"Almost Entirely Land",
+                    "Lots of Land",
                     "Mostly Land",
 					"Half Land",
 					"Earth",
 					"Earthsea",
-					"The Great Flood",
+					"Waterworld",
 					"Random",
                 },
                 DefaultValue = 5,
@@ -2691,7 +2688,7 @@ function GetMapScriptInfo()
                     "Thin",
                     "Normal",
 					"Wide",
-					"Really Wide",
+					"Very Wide",
                 },
                 DefaultValue = 2,
                 SortPriority = 2,
@@ -2743,7 +2740,7 @@ function GetMapScriptInfo()
 					"Random",
                 },
                 DefaultValue = 4,
-                SortPriority = 2,
+                SortPriority = 3,
             },
 			{
                 Name = "Island Amount",
@@ -2806,7 +2803,7 @@ function GetMapScriptInfo()
             		"Completely Scattered",
             	},
             	DefaultValue = 2,
-            	SortPriority = 2,
+            	SortPriority = 3,
             },
 			temperature,
 			rainfall,
@@ -3013,12 +3010,6 @@ function AddLakes()
 end
 
 ----------------------------------------------------------------------------------
-
-function FeatureGenerator:AddIceAtPlot(plot, iX, iY, lat)
-	if(plot:CanHaveFeature(self.featureIce)) then
-		plot:SetFeatureType(FeatureTypes.FEATURE_ICE)
-	end
-end
 
 function AddFeatures()
 	print("Adding Features (Fantasy) ...");
