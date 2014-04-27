@@ -44,6 +44,7 @@ local rainfallOption
 ----------------------------------------------------------------------------------
 
 -- local mRandom = math.random
+local randomNumbers = 0
 local function mRandom(lower, upper)
 	local divide = false
 	if lower == nil then lower = 0 end
@@ -55,7 +56,8 @@ local function mRandom(lower, upper)
 	if upper == lower or lower > upper then
 		number = lower
 	else
-		number = Map.Rand((upper + 1) - lower, "") + lower
+		randomNumbers = randomNumbers + 1
+		number = Map.Rand((upper + 1) - lower, "Fantasy Map Script " .. randomNumbers) + lower
 	end
 	if divide then number = number / upper end
 	return number
@@ -94,9 +96,10 @@ local cSizeMaxRatio = 0.3
 local cSizeMin = 11
 local cSizeMax = 50
 local iceChance = 0.5
-local atollChance = 0.2
-local coastExpandChance = 0.1
-local coastRecedeChance = 1
+local atollChance = 0.15
+local coastExpansionDice = {4, 4}
+local coastExpandChance = 0.0
+local coastRecedeChance = 0.0
 local ismuthChance = 0
 local levelMountains = 0
 local mountainThickness = 0.0
@@ -239,24 +242,14 @@ local function setBeforeOptions()
 
 	-- water depth
 	if waterDepthOption == 1 then
-		-- coastRecedeChance = 1.0
-		-- coastExpandChance = 0.0
 		coastExpansionDice = {}
 	elseif waterDepthOption == 2 then
-		coastRecedeChance = 0.0
-		coastExpandChance = 0.0
-		-- coastExpansionDice = {4, 4}
+		coastExpansionDice = {4, 4}
 	elseif waterDepthOption == 3 then
-		coastRecedeChance = 0.0
-		coastExpandChance = 0.15
-		-- coastExpansionDice = {3, 4, 5}
+		coastExpansionDice = {3, 4, 5}
 	elseif waterDepthOption == 4 then
-		coastRecedeChance = 0.67
-		coastExpandChance = 1.0
-		-- coastExpansionDice = {2, 3, 4, 5}
+		coastExpansionDice = {2, 3, 4, 5}
 	end
-	-- coastRecedeChance = 0.0
-	-- coastExpandChance = 0.0
 
 	-- continent size
 	if continentSizeOption == 1 then -- tiny
@@ -422,17 +415,17 @@ local function setBeforeOptions()
 		breakAtPoles = true
 		polarIce = true
 		xWrap = true
-	elseif mapTypeOption == 3 then -- territory
+	elseif mapTypeOption == 3 then -- area
 		useLatitude = false
 		evadePoles = false
 		breakAtPoles = false
 		polarIce = false
 		xWrap = false
-		pangaea = true
-		cSizeMinRatio = 0.4
-		cSizeMaxRatio = 0.6
-		ismuthChance = 1.0
-		-- landRatio = 0.85
+		-- pangaea = true
+		-- cSizeMinRatio = 0.4
+		-- cSizeMaxRatio = 0.6
+		-- ismuthChance = 1.0
+		-- landRatio = 0.67
 	end
 
 	--temperature
@@ -2804,8 +2797,8 @@ function GetMapScriptInfo()
                 Name = "Map Type",
                 Values = {
 					"World",
-					"Realistic World",
-					"Territory",
+					"Realistic World (polar ice, etc)",
+					"Area (non-wrapping)",
                 },
                 DefaultValue = 1,
                 SortPriority = 1,
@@ -3001,7 +2994,7 @@ function AddLakes()
 		if not plot:IsWater() then
 			if not plot:IsCoastalLand() then
 				if not plot:IsRiver() then
-					local r = Map.Rand(lakePlotRand, "MapGenerator AddLakes");
+					local r = Map.Rand(lakePlotRand, "Fantasy AddLakes");
 					if r == 0 then
 						plot:SetArea(-1);
 						plot:SetPlotType(PlotTypes.PLOT_OCEAN);
