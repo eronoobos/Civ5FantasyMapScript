@@ -2820,6 +2820,7 @@ function GetMapInitData(worldSize)
 	-- i have to use Map.GetCustomOption because this is called before everything else
 	if Map.GetCustomOption(8) == 3 or Map.GetCustomOption(8) == 4 then
 		-- for Realm maps
+		-- create a random map aspect ratio for the given map size
 		local areas = {
 			[GameInfo.Worlds.WORLDSIZE_DUEL.ID] = 250,
 			[GameInfo.Worlds.WORLDSIZE_TINY.ID] = 600,
@@ -2829,8 +2830,8 @@ function GetMapInitData(worldSize)
 			[GameInfo.Worlds.WORLDSIZE_HUGE.ID] = 4000,
 		}
 		local grid_area = areas[worldSize]
-		local grid_width = mSqrt(grid_area) * ((mRandom() * 0.67) + 0.67)
-		local grid_height = grid_area / grid_width
+		local grid_width = mCeil( mSqrt(grid_area) * ((mRandom() * 0.67) + 0.67) )
+		local grid_height = mCeil( grid_area / grid_width )
 		local world = GameInfo.Worlds[worldSize]
 		if world ~= nil then
 			return {
