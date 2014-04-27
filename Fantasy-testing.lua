@@ -67,6 +67,7 @@ local mFloor = math.floor
 local mMin = math.min
 local mMax = math.max
 local mAbs = math.abs
+local mSqrt = math.sqrt
 local tInsert = table.insert
 local tRemove = table.remove
 
@@ -409,6 +410,12 @@ local function setBeforeOptions()
 		breakAtPoles = false
 		polarIce = false
 		xWrap = false
+	elseif mapTypeOption == 4 then -- realistic realm
+		useLatitude = true
+		evadePoles = false
+		breakAtPoles = false
+		polarIce = true
+		xWrap = false
 		-- pangaea = true
 		-- cSizeMinRatio = 0.4
 		-- cSizeMaxRatio = 0.6
@@ -459,21 +466,17 @@ end
 
 
 local function setAfterOptions()
-
 	-- ocean size and latitude-based climate
-	if oceanSizeOption == 1 or mapTypeOption ~= 1 then
+	if oceanSizeOption == 1 or useLatitude or xWrap then
 		southPole = -1
 		northPole = yMax
 		evadePoles = false
 	end
-
 	--expand pangaea "continent size maximum" to half of land area
 	-- and half the number of islands
-	if continentSizeOption == 5 or mapTypeOption == 3 then
+	if pangaea then
 		islandRatio = islandRatio / 2
-
 	end
-
 end
 
 
@@ -487,7 +490,7 @@ local function setTileDictionary()
 	terrainCoast = GameInfoTypes["TERRAIN_COAST"]
 	terrainOcean = GameInfoTypes["TERRAIN_OCEAN"]
 
-tileDictionary = {
+	tileDictionary = {
 		["Plains"] = {
 			plotType = PlotTypes.PLOT_LAND,
 			terrainType = terrainPlains,
@@ -630,13 +633,6 @@ end
 
 
 local function setNesses()
-
-	--[[
-	terrainAlly[terrainTundra] = terrainSnow
-	terrainAlly[terrainSnow] = terrainTundra
-	terrainAlly[terrainPlains] = terrainGrass
-	terrainAlly[terrainGrass] = terrainPlains
-	]]--
 
 	terrainAllies[terrainSnow] = { terrainTundra }
 	terrainAllies[terrainTundra] = { terrainSnow, terrainPlains }
@@ -1794,6 +1790,20 @@ local function fillTinyLakes()
 	end
 end
 
+local function precalcFantasyLatitude()
+	local sign = Map.Rand(1, "is the realm in the south or north hemisphere")
+	local endLatitude
+	if sign == 0 then
+		realmStartLatitude = mRandom(30, 90)
+		endLatitude = mRandom(realmStartLatitude - 30, 0)
+		
+	else
+		realmStartLatitude = mRandom(0, 60)
+		endLatitude = mRandom(realmStartLatitude + 30, 90)
+	end
+	realmMultLatitude = (endLatitude - realmStartLatitude) / iH
+end
+
 local function GetFantasyLatitude(plot)
 	if xWrap then return plot:GetLatitude() end
 	return realmStartLatitude + (realmMultLatitude * plot:GetY())
@@ -1807,7 +1817,7 @@ local function tileLatitudeChecks(index, tileName)
 	local ft = tileDictionary[tileName].feature
 	local plot = Map.GetPlotByIndex(index - 1)
 	local latitude
-	if plot ~= nil then latitude = plot:GetLatitude() end
+	if plot ~= nil then latitude = GetFantasyLatitude(plot) end
 	if latitude ~= nil then
 		local tolerance = mRandom(-1,1)
 		tolerance = tolerance * latitudeTolerance
@@ -2018,7 +2028,7 @@ local function growRegions()
 		local latitude
 		if useLatitude == true then
 			local plot = Map.GetPlotByIndex(index - 1)
-			if plot ~= nil then latitude = plot:GetLatitude() end
+			if plot ~= nil then latitude = GetFantasyLatitude(plot) end
 			EchoDebug(latitude)
 		end
 		regionName = regionIterations
@@ -2437,7 +2447,7 @@ local function popCoasts()
 		local thisIceChance = iceChance
 		if plot ~= nil then
 			if useLatitude == true then
-				local latitude = plot:GetLatitude()
+				local latitude = GetFantasyLatitude(plot)
 				local m = (latitude ^ 2) / 8100
 				thisIceChance = iceChance * m
 			end
@@ -2775,23 +2785,13 @@ function GetMapScriptInfo()
                 DefaultValue = 3,
                 SortPriority = 2,
             },
-            --[[
-			{
-                Name = "Latitude-Sensitive Climate",
-                Values = {
-					"No",
-					"Yes",
-                },
-                DefaultValue = 1,
-                SortPriority = 2,
-            },
-            ]]--
             {
                 Name = "Map Type",
                 Values = {
 					"World",
-					"Realistic World (polar ice, etc)",
-					"Realm (non-wrapping)",
+					"Realistic World",
+					"Realm",
+					"Realistic Realm"
                 },
                 DefaultValue = 1,
                 SortPriority = 1,
@@ -2817,7 +2817,8 @@ end
 
 
 function GetMapInitData(worldSize)
-	if Map.GetCustomOption(8) == 3 then
+	-- i have to use Map.GetCustomOption because this is called before everything else
+	if Map.GetCustomOption(8) == 3 or Map.GetCustomOption(8) == 4 then
 		-- for Realm maps
 		local areas = {
 			[GameInfo.Worlds.WORLDSIZE_DUEL.ID] = 250,
@@ -2860,12 +2861,16 @@ function GeneratePlotTypes()
 
 	setAfterOptions()
 
+	if not xWrap and useLatitude then
+		precalcFantasyLatitude()
+	end
+
 	regionAvgSize = mFloor( (regionMinSize + regionMaxSize) / 2 )
 
 	maxRegions = mFloor( (4 * landArea) / regionAvgSize )
 	print(iW, "by", iH)
-	print("land area", landArea)
-	print("maximum regions", maxRegions)
+	EchoDebug("land area", landArea)
+	EchoDebug("maximum regions", maxRegions)
 
 	print("growing continents...")
 	growContinents()
@@ -3060,8 +3065,8 @@ function AddFeatures()
 						end
 					end
 				end
-			elseif plot:GetLatitude() > featureLatitudes[FeatureTypes.FEATURE_ICE].mini then
-				if plot:GetTerrainType() == 6 and plot:CanHaveFeature(FeatureTypes.FEATURE_ICE) and mRandom() < iceChance * (plot:GetLatitude() / 270) then
+			elseif GetFantasyLatitude(plot) > featureLatitudes[FeatureTypes.FEATURE_ICE].mini then
+				if plot:GetTerrainType() == 6 and plot:CanHaveFeature(FeatureTypes.FEATURE_ICE) and mRandom() < iceChance * (GetFantasyLatitude(plot) / 270) then
 					local iceHere = true
 					local nearice = {}
 					for d = 1, 6 do
