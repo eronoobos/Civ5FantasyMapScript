@@ -36,7 +36,7 @@ local continentShapeOption
 local islandAmountOption
 local worldAgeOption
 local regionSizeOption
-local latitudeSensitiveOption
+local mapTypeOption
 local mountainClumpinessOption
 local temperatureOption
 local rainfallOption
@@ -214,7 +214,6 @@ local function setBeforeOptions()
 	islandAmountOption = Map.GetCustomOption(5)
 	worldAgeOption = Map.GetCustomOption(6)
 	regionSizeOption = Map.GetCustomOption(7)
-	-- latitudeSensitiveOption = Map.GetCustomOption(8)
 	mapTypeOption = Map.GetCustomOption(8)
 	mountainClumpinessOption = Map.GetCustomOption(9)
 	temperatureOption = Map.GetCustomOption(10)
@@ -391,17 +390,6 @@ local function setBeforeOptions()
 		print("random region min size: ", regionMinSize, "  random region max size: ", regionMaxSize)
 	end
 
-	--[[
-	-- latitude-based climate
-	if latitudeSensitiveOption == 1 then
-		useLatitude = false
-	elseif latitudeSensitiveOption == 2 then
-		useLatitude = true
-		polarIce = true
-		evadePoles = false
-	end
-	]]--
-
 	-- map type
 	if mapTypeOption == 1 then -- world
 		useLatitude = false
@@ -415,7 +403,7 @@ local function setBeforeOptions()
 		breakAtPoles = true
 		polarIce = true
 		xWrap = true
-	elseif mapTypeOption == 3 then -- area
+	elseif mapTypeOption == 3 then -- realm
 		useLatitude = false
 		evadePoles = false
 		breakAtPoles = false
@@ -1806,6 +1794,11 @@ local function fillTinyLakes()
 	end
 end
 
+local function GetFantasyLatitude(plot)
+	if xWrap then return plot:GetLatitude() end
+	return realmStartLatitude + (realmMultLatitude * plot:GetY())
+end
+
 local function tileLatitudeChecks(index, tileName)
 	local tt = tileDictionary[tileName].terrainType
 	if tileDictionary[tileName].terrainMasquerade ~= nil then
@@ -2798,7 +2791,7 @@ function GetMapScriptInfo()
                 Values = {
 					"World",
 					"Realistic World (polar ice, etc)",
-					"Area (non-wrapping)",
+					"Realm (non-wrapping)",
                 },
                 DefaultValue = 1,
                 SortPriority = 1,
@@ -2824,27 +2817,28 @@ end
 
 
 function GetMapInitData(worldSize)
-	print("HELLO")
 	if Map.GetCustomOption(8) == 3 then
-		local worldsizes = {
-			[GameInfo.Worlds.WORLDSIZE_DUEL.ID] = {18, 14},
-			[GameInfo.Worlds.WORLDSIZE_TINY.ID] = {28, 22},
-			[GameInfo.Worlds.WORLDSIZE_SMALL.ID] = {36, 26},
-			[GameInfo.Worlds.WORLDSIZE_STANDARD.ID] = {44, 32},
-			[GameInfo.Worlds.WORLDSIZE_LARGE.ID] = {56, 44},
-			[GameInfo.Worlds.WORLDSIZE_HUGE.ID] = {72, 56}
-			}
-		local grid_size = worldsizes[worldSize];
-		local world = GameInfo.Worlds[worldSize];
+		-- for Realm maps
+		local areas = {
+			[GameInfo.Worlds.WORLDSIZE_DUEL.ID] = 250,
+			[GameInfo.Worlds.WORLDSIZE_TINY.ID] = 600,
+			[GameInfo.Worlds.WORLDSIZE_SMALL.ID] = 900,
+			[GameInfo.Worlds.WORLDSIZE_STANDARD.ID] = 1400,
+			[GameInfo.Worlds.WORLDSIZE_LARGE.ID] = 2400,
+			[GameInfo.Worlds.WORLDSIZE_HUGE.ID] = 4000,
+		}
+		local grid_area = areas[worldSize]
+		local grid_width = mSqrt(grid_area) * ((mRandom() * 0.67) + 0.67)
+		local grid_height = grid_area / grid_width
+		local world = GameInfo.Worlds[worldSize]
 		if world ~= nil then
 			return {
-				Width = grid_size[1],
-				Height = grid_size[2],
+				Width = grid_width,
+				Height = grid_height,
 				WrapX = false,
-			};      
+			}
 	    end
 	end
-
 end
 
 

@@ -1,9 +1,6 @@
 -- drastic change: seperate map into seperate areas of contiguous coast before growing continents within them, to control how many pre-astronomy contiguous areas there are
--- instead of base tile, any unoccupied continental tiles should be filled with a region as every other, which leaves the question why aren't they getting filled as normal by growRegions? did i already do this?
--- add minimum to dice roll function (so that wet climates can more consistently put forests & jungles)? did i already do this?
 -- try to figure out what causes texture errors?
 -- code change: regionIndex and regionName are now redundant. merge them.
--- better system for figuring out where deep & shallow areas are for expanding coasts
 
 v19 --> v20
 -- revert to relative continent sizes
