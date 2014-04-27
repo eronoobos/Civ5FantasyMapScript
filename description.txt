@@ -1,0 +1,11 @@
+Custom Options: 
+- Map Type: World and Realistic World wrap east/west. Realm and Realistic Realm do not wrap. Realistic types have cold terrain at the poles and hot terrain at the equator.
+- World Age: controls amount of mountains &amp; hills. has three more options than usual. 
+- Region Size: size of the blobs of similar terrain within each continent. 
+- Continent Size: how big are the major landmasses?
+- Continent Shape: snakey to blobby. "Extra Snakey" can result in 1-tile-wide spaghetti. "Total Blobs" tend to be wide and round. 
+- Island Amount: How much of the land is in masses smaller than 11 hexes. "Few" is 3% of land area, "Tons" is 50% of land area. 
+- Ocean Size: "Waterworld" to "Almost Entrirely Land." All options result in navegable ocean poles except for "Channels" 
+- Coast Width: "Thin" removes all coastal tiles but those directly adjacent to land. "Normal" uses Civ V's standard algorithm. "Wide" and "Really Wide" expand the standard algorithm. 
+- Temperature &amp; Rainfall: If one of these is set to "Random", it will just pick one out of the three. If both are set to "Random", an entirely randomized climate is generated. 
+- Mountain Clumpiness: "Epic Clumps" results in a small number of dense mountain ranges, whereas "Completely Scattered" distributes the mountains in a fairly uniform manner.
