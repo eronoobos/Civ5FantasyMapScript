@@ -464,7 +464,7 @@ end
 
 local function setAfterOptions()
 	-- ocean size and latitude-based climate
-	if oceanSizeOption == 1 or useLatitude or xWrap then
+	if oceanSizeOption == 1 or useLatitude or not xWrap then
 		southPole = -1
 		northPole = yMax
 		evadePoles = false
