@@ -1788,17 +1788,17 @@ local function fillTinyLakes()
 end
 
 local function precalcFantasyLatitude()
-	local sign = Map.Rand(1, "is the realm in the south or north hemisphere")
+	local sign = Map.Rand(2, "is the realm in the south or north hemisphere")
 	local endLatitude
 	if sign == 0 then
-		realmStartLatitude = mRandom(30, 90)
-		endLatitude = mRandom(realmStartLatitude - 30, 0)
-		
+		realmStartLatitude = mRandom(40, 90)
+		endLatitude = mRandom(realmStartLatitude - 40, 0)
 	else
-		realmStartLatitude = mRandom(0, 60)
-		endLatitude = mRandom(realmStartLatitude + 30, 90)
+		realmStartLatitude = mRandom(0, 50)
+		endLatitude = mRandom(realmStartLatitude + 40, 90)
 	end
 	realmMultLatitude = (endLatitude - realmStartLatitude) / iH
+	EchoDebug(realmStartLatitude, endLatitude, realmMultLatitude)
 end
 
 local function GetFantasyLatitude(plot)
