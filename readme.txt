@@ -1,3 +1,4 @@
+
 -- drastic change: seperate map into seperate areas of contiguous coast before growing continents within them, to control how many pre-astronomy contiguous areas there are
 -- try to figure out what causes texture errors?
 -- code change: regionIndex and regionName are now redundant. merge them.
